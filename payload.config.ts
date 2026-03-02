@@ -32,6 +32,12 @@ import { Experiencias } from './src/payload/collections/Experiencias'
 import { PaginaInicio } from './src/payload/globals/PaginaInicio'
 import { ConfiguracionSitio } from './src/payload/globals/ConfiguracionSitio'
 
+// Plugin de backups granulares
+import { backupPlugin } from './plugins/backupPlugin'
+
+// Re-exportar el importMap generado por Payload (requerido por page.tsx del admin)
+export { importMap } from './src/app/(payload)/admin/importMap.js'
+
 export default buildConfig({
   // Configuraciรณn del panel de administraciรณn
   admin: {
@@ -102,17 +108,48 @@ export default buildConfig({
   ].filter(Boolean) as string[],
 
   plugins: [
-    bunnyStorage({
-      collections: {
-        archivos: true,
-      },
-      storage: {
-        apiKey: process.env.BUNNY_STORAGE_PASSWORD || '',
-        zoneName: process.env.BUNNY_STORAGE_ZONE_NAME || '',
-        hostname: process.env.PUBLIC_BUNNY_CDN_URL || 'https://warynessy.b-cdn.net',
+    // Solo activar Bunny Storage en producción o cuando estén configuradas las credenciales
+    ...(process.env.BUNNY_STORAGE_PASSWORD && process.env.BUNNY_STORAGE_ZONE_NAME ? [
+      bunnyStorage({
+        collections: {
+          archivos: true,
+        },
+        storage: {
+          apiKey: process.env.BUNNY_STORAGE_PASSWORD || '',
+          zoneName: process.env.BUNNY_STORAGE_ZONE_NAME || '',
+          hostname: process.env.PUBLIC_BUNNY_CDN_URL || 'https://warynessy.b-cdn.net',
+        },
+      }),
+    ] : []),
+    backupPlugin({
+      // Colecciones a monitorizar (excluye automáticamente las internas del plugin)
+      collections: [
+        'alergenos',
+        'categorias',
+        'platos',
+        'menus',
+        'menus-grupo',
+        'espacios',
+        'banners',
+        'archivos',
+        'paginas',
+        'experiencias',
+      ],
+      // Globals a monitorizar
+      globals: ['pagina-inicio', 'configuracion-sitio'],
+      // Configuración del agente de background
+      agent: {
+        incrementalIntervalMs: 60 * 60 * 1000,   // Consolidar cada hora
+        fullBackupIntervalMs: 24 * 60 * 60 * 1000, // Backup completo cada 24h
+        consolidateAfterDeltas: 100,               // Consolidar tras 100 cambios
+        retention: {
+          maxDeltas: 500,
+          maxIncrementalSnapshots: 30,
+          keepWeeklySnapshots: 4,
+          keepMonthlySnapshots: 12,
+        },
       },
     }),
   ],
 })
 
-export const importMap = {}

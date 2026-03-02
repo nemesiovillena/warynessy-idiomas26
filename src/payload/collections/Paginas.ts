@@ -34,7 +34,7 @@ export const Paginas: CollectionConfig = {
             required: true,
             unique: true,
             admin: {
-                description: 'Identificador único (nosotros, carta, contacto...)',
+                description: 'Identificador único (historia, carta, contacto...)',
             },
         },
         {
@@ -115,6 +115,47 @@ export const Paginas: CollectionConfig = {
                             ],
                         },
                     ],
+                },
+                {
+                    label: 'Layout Historia',
+                    admin: {
+                        condition: (data, siblingData) => {
+                            const slug = data?.slug || siblingData?.slug;
+                            return slug?.toLowerCase() === 'historia';
+                        },
+                    },
+                    fields: [
+                        {
+                            name: 'historiaMision',
+                            type: 'textarea',
+                            label: 'Nuestra Misión / Introducción',
+                        },
+                        {
+                            name: 'historiaHitos',
+                            type: 'array',
+                            label: 'Hitos Históricos',
+                            fields: [
+                                {
+                                    name: 'titulo',
+                                    type: 'text',
+                                    label: 'Título del Hito (ej: Los Inicios)',
+                                    required: true,
+                                },
+                                {
+                                    name: 'descripcion',
+                                    type: 'textarea',
+                                    label: 'Descripción del Hito',
+                                    required: true,
+                                },
+                                {
+                                    name: 'imagen',
+                                    type: 'upload',
+                                    relationTo: 'archivos',
+                                    label: 'Imagen Asociada (Opcional)',
+                                },
+                            ]
+                        }
+                    ]
                 },
                 {
                     label: 'SEO y Metadatos',

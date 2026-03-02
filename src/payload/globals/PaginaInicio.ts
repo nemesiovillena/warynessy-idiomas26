@@ -39,7 +39,7 @@ export const PaginaInicio: GlobalConfig = {
       type: 'text',
       label: 'Título de Bienvenida',
       admin: {
-        description: 'Título de la sección "Sobre nosotros"',
+        description: 'Título de la sección de bienvenida (Historia)',
       },
     },
     {

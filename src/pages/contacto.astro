@@ -8,7 +8,7 @@ const siteSettings = await getSiteSettings();
 const pageData = await getPaginaBySlug('contacto');
 
 const pageTitle = pageData?.metaTitle || `Contacto | ${siteSettings?.title || "Warynessy"}`;
-const pageDescription = pageData?.metaDescription || "Contacta con nosotros para reservas o consultas.";
+const pageDescription = pageData?.metaDescription || "Contacta con el equipo de Warynessy para reservas o consultas.";
 
 const contact = siteSettings?.contact || {
   address: "Isabel la Católica, 13 A, 03400 Villena, Alicante",
@@ -34,7 +34,7 @@ const heroImg = typeof pageData?.heroImage === 'object' && pageData?.heroImage?.
           {pageData?.heroTitle || "Contacta con nosotros"}
         </h1>
         <p class="text-white/60 text-lg max-w-2xl mx-auto font-light">
-          {pageData?.heroSubtitle ? "" : "¿Tienes alguna duda o quieres organizar un evento especial? Contacta con nosotros."}
+          {pageData?.heroSubtitle ? "" : "¿Tienes alguna duda o quieres organizar un evento especial? Contacta con el equipo."}
         </p>
      </Container>
   </section>

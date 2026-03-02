@@ -1,7 +1,10 @@
 // Cliente REST de Payload para Astro
 // Usa la API REST de Payload en lugar de la API local para evitar conflictos de inicialización
 
-const API_URL = process.env.PUBLIC_PAYLOAD_API_URL || 'https://admin.warynessy.eneweb.es/api'
+// Usar process.env para SSR en Astro
+const API_URL = process.env.PUBLIC_PAYLOAD_API_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL
+  ? `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api`
+  : 'http://localhost:3000/api'
 
 interface PayloadResponse<T> {
   docs: T[]
@@ -108,7 +111,8 @@ export async function getMenus(activo = true) {
 
 export async function getMenuBySlug(slug: string) {
   // Use direct query string format for Payload REST API
-  const url = `/menus?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=2`
+  // Aumentamos depth a 3 para asegurar que se cargan todos los campos Rich Text correctamente
+  const url = `/menus?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=3`
   const result = await fetchAPI<PayloadResponse<any>>(url)
   return result.docs[0] || null
 }

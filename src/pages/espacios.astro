@@ -25,7 +25,7 @@ const splitImages = [
 
 <MainLayout title={pageTitle} description={pageDescription} noPaddingTop={true}>
   
-  <div class="flex flex-col lg:flex-row min-h-screen bg-background-light dark:bg-zinc-900">
+  <div class="flex flex-col lg:flex-row min-h-screen bg-matte-black">
     
     <!-- Left Side: Sticky Images (Desktop) -->
     <aside class="w-full lg:w-1/2 lg:sticky lg:top-0 lg:h-screen bg-matte-black overflow-hidden z-0">
@@ -55,20 +55,20 @@ const splitImages = [
     </aside>
 
     <!-- Right Side: Content (Scrollable) -->
-    <main class="w-full lg:w-1/2 relative z-10 shadow-[-20px_0_50px_rgba(0,0,0,0.2)] bg-background-light dark:bg-zinc-900">
+    <main class="w-full lg:w-1/2 relative z-10 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] bg-matte-black">
       
       <!-- Hero/Intro Section within Scroll -->
       <section class="pt-24 pb-12 px-8 md:px-16 animate-fade-up">
          <span class="text-primary font-bold tracking-[0.3em] uppercase text-xs mb-4 block">Nuestros Ambientes</span>
-         <h1 class="text-5xl md:text-7xl font-display font-black text-warynessy-black dark:text-white mb-6 uppercase tracking-tighter">
+         <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 uppercase tracking-tighter">
            {pageData?.heroTitle || 'Espacios únicos'}
          </h1>
-         <p class="text-gray-600 dark:text-gray-400 text-lg font-light leading-relaxed max-w-xl">
+         <p class="text-gray-400 text-lg font-light leading-relaxed max-w-xl">
             {pageData?.heroSubtitle || 'Cada rincón de Warynessy ha sido diseñado para crear la atmósfera perfecta. Descubre donde la gastronomía se encuentra con el confort en un entorno incomparable.'}
          </p>
          {pageData?.descripcionEspacios && (
            <div class="mt-6">
-             <RichText content={pageData.descripcionEspacios} class="text-gray-600 dark:text-gray-400 text-base leading-relaxed" />
+             <RichText content={pageData.descripcionEspacios} class="text-gray-400 text-base leading-relaxed" />
            </div>
          )}
          <div class="mt-8 h-px w-24 bg-primary/30"></div>
@@ -86,7 +86,7 @@ const splitImages = [
             <div class="flex flex-col gap-8 animate-fade-up" style={`animation-delay: ${index * 100}ms`}>
                <div class="flex items-center gap-4">
                  <span class="text-primary font-bold tracking-tighter text-4xl opacity-20">0{index + 1}</span>
-                 <h2 class="text-3xl md:text-5xl font-display font-black text-warynessy-black dark:text-white uppercase tracking-tight">
+                 <h2 class="text-3xl md:text-5xl font-display font-black text-white uppercase tracking-tight">
                    {space.nombre}
                  </h2>
                </div>
@@ -107,11 +107,11 @@ const splitImages = [
                </div>
 
                <div class="flex flex-col gap-6">
-                  <RichText content={space.descripcion} class="text-gray-600 dark:text-gray-400 text-base leading-relaxed" />
+                  <RichText content={space.descripcion} class="text-gray-400 text-base leading-relaxed" />
                   
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {space.capacidad && (
-                      <div class="p-4 rounded-xl bg-white dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-800 flex items-center gap-3">
+                      <div class="p-4 rounded-xl bg-zinc-900/50 border border-white/5 flex items-center gap-3">
                         <span class="material-symbols-outlined text-primary">groups</span>
                         <div>
                           <p class="text-[10px] uppercase tracking-widest text-gray-400 font-bold leading-none mb-1">Capacidad</p>
@@ -121,7 +121,7 @@ const splitImages = [
                     )}
                     
                     {space.caracteristicas && space.caracteristicas.length > 0 && (
-                      <div class="p-4 rounded-xl bg-white dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-800 flex flex-wrap gap-2">
+                      <div class="p-4 rounded-xl bg-zinc-900/50 border border-white/5 flex flex-wrap gap-2">
                          {space.caracteristicas.map((item: any) => (
                            <span class="text-[10px] font-black uppercase tracking-tight text-gray-500">
                              • {item.caracteristica}

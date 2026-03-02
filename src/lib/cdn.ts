@@ -1,7 +1,7 @@
 /**
- * Bunny.net CDN Helper
- * Transforma URLs de Payload a URLs optimizadas de Bunny.net
- */
+* Bunny.net CDN Helper
+* Transforma URLs de Payload a URLs optimizadas de Bunny.net
+*/
 
 // Helper para obtener variables de entorno de forma segura tanto en build-time como runtime
 function getEnv(key: string, defaultValue: string = ''): string {
@@ -52,12 +52,16 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
     // Asegurarnos de que el path empieza por /
     if (!path.startsWith('/')) path = '/' + path;
 
-    // Si estamos en desarrollo puro (localhost) y NO tenemos CDN, devolvemos al server local
-    const isLocalDev = typeof window !== 'undefined'
-        ? window.location.hostname === 'localhost'
-        : process.env.NODE_ENV !== 'production';
+    // Log para depurar
+    console.log('[CDN Debug]', {
+        NODE_ENV: process.env.NODE_ENV,
+        BUNNY_URL,
+        PAYLOAD_URL,
+        path: path.substring(0, 50),
+        willUseCDN: !!BUNNY_URL
+    });
 
-    if (!BUNNY_URL || (isLocalDev && !path.includes('/media/'))) {
+    if (!BUNNY_URL) {
         return `${PAYLOAD_URL}${path}`;
     }
 

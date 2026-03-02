@@ -1,22 +1,28 @@
-# Docker Compose for Development
-# Usage: docker-compose up -d
+# Docker Compose para Desarrollo Local
+# ─────────────────────────────────────
+# Uso:
+#   cp .env.local .env        ← una sola vez para apuntar a BD local
+#   docker-compose up -d      ← levanta PostgreSQL + Payload + Astro
+#
+# La BD es LOCAL (no producción). Los datos se guardan en el
+# volumen Docker 'postgres_data' en tu máquina.
 
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database LOCAL
   db:
     image: postgres:16-alpine
     container_name: warynessy-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-warynessy}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-warynessy_dev}
-      POSTGRES_DB: ${POSTGRES_DB:-warynessy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-warynessy_dev_local}
+      POSTGRES_DB: ${POSTGRES_DB:-warynessy_dev}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-warynessy} -d ${POSTGRES_DB:-warynessy}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-warynessy} -d ${POSTGRES_DB:-warynessy_dev}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -42,6 +48,7 @@ services:
     volumes:
       # Source code for hot reload
       - ./src:/app/src
+      - ./plugins:/app/plugins
       - ./payload.config.ts:/app/payload.config.ts
       - ./server.ts:/app/server.ts
       - ./next.config.mjs:/app/next.config.mjs

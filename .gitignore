@@ -58,6 +58,7 @@ Thumbs.db
 
 # Payload CMS
 media/
+archivos/
 .payload/
 build/
 src/payload/payload-types.ts
