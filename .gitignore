@@ -81,5 +81,8 @@ sanity-old/
 # Bunny.net / CDN
 cdn-uploads/
 
+# Build artifacts
+server.js
+
 # Optional: Imágenes locales grandes (si se usan en CDN)
 # public/images/large/

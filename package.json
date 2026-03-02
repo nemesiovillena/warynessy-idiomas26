@@ -6,10 +6,11 @@
     "dev": "astro dev",
     "dev:payload": "tsx server.ts",
     "dev:admin": "next dev -p 3000",
-    "build": "astro build && next build",
+    "build": "astro build && next build && npm run build:server",
     "build:astro": "astro build",
     "build:payload": "next build",
-    "start": "NODE_ENV=production tsx server.ts",
+    "build:server": "esbuild server.ts --bundle=false --platform=node --format=esm --outfile=server.js",
+    "start": "NODE_ENV=production node server.js",
     "preview": "astro preview",
     "astro": "astro",
     "payload": "payload",
@@ -50,6 +51,7 @@
   "devDependencies": {
     "@types/node": "^25.0.8",
     "@types/react": "^19.2.8",
+    "esbuild": "^0.25.0",
     "typescript": "^5.9.3"
   },
   "optionalDependencies": {

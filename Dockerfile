@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.4
 # ========================================
 # Stage 1: Dependencies
 # ========================================
@@ -10,8 +11,9 @@ RUN apk add --no-cache libc6-compat
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install all dependencies
-RUN npm install --prefer-offline --no-audit --no-fund
+# Install all dependencies (cache mount para reutilizar entre builds)
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --prefer-offline --no-audit --no-fund
 
 # ========================================
 # Stage 2: Builder
@@ -39,7 +41,6 @@ ENV PUBLIC_SITE_NAME=Warynessy
 # Build both Astro and Next.js/Payload
 RUN npm run build
 
-# Note: server.ts will be executed directly with tsx in production
 
 # ========================================
 # Stage 3: Production Runtime
@@ -71,8 +72,8 @@ COPY --from=builder /app/dist ./dist
 # Copy package.json for module resolution
 COPY --from=builder /app/package.json ./
 
-# Copy server.ts (will be executed with tsx)
-COPY --from=builder /app/server.ts ./
+# Copy server.js (pre-compilado con esbuild, no necesita tsx en runtime)
+COPY --from=builder /app/server.js ./
 
 # Copy migrations folder
 COPY --from=builder /app/src/migrations ./src/migrations
@@ -82,7 +83,7 @@ RUN echo '#!/bin/sh' > /app/start.sh && \
     echo 'echo "Running Payload migrations..."' >> /app/start.sh && \
     echo 'npx payload migrate || echo "Migration failed or no migrations to run"' >> /app/start.sh && \
     echo 'echo "Starting server..."' >> /app/start.sh && \
-    echo 'exec npx tsx server.ts' >> /app/start.sh && \
+    echo 'exec node server.js' >> /app/start.sh && \
     chmod +x /app/start.sh
 
 # Create media directory with correct permissions
