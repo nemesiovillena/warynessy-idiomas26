@@ -14,8 +14,8 @@ services:
       HOSTNAME: 0.0.0.0
       DATABASE_URL: "${DATABASE_URL:-postgresql://warynessy:Warynessy2026SecurePass@72.62.183.215:5436/warynessy}"
       PAYLOAD_SECRET: "${PAYLOAD_SECRET}"
-      PAYLOAD_PUBLIC_SERVER_URL: https://warynessy.com
-      PUBLIC_PAYLOAD_API_URL: https://warynessy.com/api
+      PAYLOAD_PUBLIC_SERVER_URL: https://admin.warynessy.com
+      PUBLIC_PAYLOAD_API_URL: https://admin.warynessy.com/api
       PUBLIC_SITE_URL: https://warynessy.com
       PUBLIC_SITE_NAME: "${PUBLIC_SITE_NAME:-Restaurante Warynessy}"
       BUNNY_CDN_URL: "${BUNNY_CDN_URL:-}"
@@ -43,7 +43,7 @@ services:
       PORT: 4321
       # Astro no necesita DATABASE_URL, accede a Payload vía API
       PAYLOAD_SECRET: "${PAYLOAD_SECRET}"
-      PUBLIC_PAYLOAD_API_URL: https://warynessy.com/api
+      PUBLIC_PAYLOAD_API_URL: https://admin.warynessy.com/api
       PUBLIC_SITE_URL: https://warynessy.com
       PUBLIC_SITE_NAME: "${PUBLIC_SITE_NAME:-Restaurante Warynessy}"
       PUBLIC_BUNNY_CDN_URL: "${BUNNY_CDN_URL:-}"
