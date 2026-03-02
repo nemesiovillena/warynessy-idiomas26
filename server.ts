@@ -217,48 +217,41 @@ async function start() {
   const app = express()
 
   // Headers de seguridad para prevenir ataques comunes
+  // Se omiten en rutas de Payload/Next.js para no interferir con el admin
   app.use((req, res, next) => {
-    // Prevenir clickjacking
-    res.setHeader('X-Frame-Options', 'DENY')
+    const isPayloadRoute = /^\/(admin|api|_next)(\/|$)/.test(req.path)
 
-    // Content Security Policy para prevenir XSS
-    res.setHeader('Content-Security-Policy',
-      "default-src 'self'; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googletagmanager.com *.google-analytics.com; " +
-      "style-src 'self' 'unsafe-inline' *.googleapis.com *.cloudflare.com cdnjs.cloudflare.com; " +
-      "img-src 'self' data: blob: *.googleapis.com *.gstatic.com *.b-cdn.net lh3.googleusercontent.com; " +
-      "font-src 'self' *.googleapis.com *.gstatic.com *.cloudflare.com cdnjs.cloudflare.com; " +
-      "connect-src 'self' *.google-analytics.com *.googletagmanager.com; " +
-      "frame-ancestors 'none';"
-    )
+    if (!isPayloadRoute) {
+      // Content Security Policy solo para rutas de Astro
+      res.setHeader('Content-Security-Policy',
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' *.googletagmanager.com *.google-analytics.com; " +
+        "style-src 'self' 'unsafe-inline' *.googleapis.com *.cloudflare.com cdnjs.cloudflare.com; " +
+        "img-src 'self' data: blob: *.googleapis.com *.gstatic.com *.b-cdn.net lh3.googleusercontent.com; " +
+        "font-src 'self' *.googleapis.com *.gstatic.com *.cloudflare.com cdnjs.cloudflare.com; " +
+        "connect-src 'self' *.google-analytics.com *.googletagmanager.com; " +
+        "frame-ancestors 'none';"
+      )
+      res.setHeader('X-Frame-Options', 'DENY')
+      res.setHeader('Permissions-Policy',
+        'geolocation=(), ' +
+        'microphone=(), ' +
+        'camera=(), ' +
+        'payment=(), ' +
+        'usb=(), ' +
+        'magnetometer=(), ' +
+        'gyroscope=(), ' +
+        'accelerometer=()'
+      )
+    }
 
-    // XSS Protection
+    // Headers comunes a todas las rutas
     res.setHeader('X-XSS-Protection', '1; mode=block')
-
-    // Prevenir MIME-sniffing
     res.setHeader('X-Content-Type-Options', 'nosniff')
-
-    // HSTS (solo en producción con HTTPS)
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
     if (!dev) {
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
     }
-
-    // Referrer Policy
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
-
-    // Permissions Policy
-    res.setHeader('Permissions-Policy',
-      'geolocation=(), ' +
-      'microphone=(), ' +
-      'camera=(), ' +
-      'payment=(), ' +
-      'usb=(), ' +
-      'magnetometer=(), ' +
-      'gyroscope=(), ' +
-      'accelerometer=()'
-    )
-
-    // Ocultar información del servidor
     res.removeHeader('X-Powered-By')
 
     next()
