@@ -207,7 +207,12 @@ async function runDatabaseHotfix() {
 }
 
 async function start() {
-  await runDatabaseHotfix()
+  try {
+    await runDatabaseHotfix()
+  } catch (dbError) {
+    console.error('❌ Database hotfix failed:', dbError)
+    // Continuar aunque el hotfix falle
+  }
 
   const app = express()
 
@@ -261,10 +266,13 @@ async function start() {
 
   // Inicializar Next.js para Payload CMS
   const nextApp = next({ dev, dir: process.cwd() })
+  console.log('📦 Initializing Next.js...')
   try {
     await nextApp.prepare()
+    console.log('✅ Next.js initialized successfully')
   } catch (err) {
     console.error('❌ Critical error during Next.js app.prepare():', err)
+    console.error('Error details:', err)
     process.exit(1)
   }
   const nextHandler = nextApp.getRequestHandler()
