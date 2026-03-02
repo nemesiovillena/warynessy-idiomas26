@@ -269,7 +269,6 @@ async function start() {
     process.exit(1)
   }
   const nextHandler = nextApp.getRequestHandler()
-  app.use(express.static(path.join(__dirname, 'dist/client'), { index: false }))
 
   // Rate limiting para endpoint de contacto (prevenir SPAM y DoS)
   const contactLimiter = rateLimit({
