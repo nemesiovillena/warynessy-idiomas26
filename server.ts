@@ -135,11 +135,85 @@ async function runDatabaseHotfix() {
     // 3. Fix relation columns in other tables
     // ========================================
 
+    // ========================================
+    // 4. Crear tabla backup_deltas si no existe
+    // ========================================
+    const backupDeltasExists = await pool.query(`
+      SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'backup_deltas');
+    `)
+    if (!backupDeltasExists.rows[0].exists) {
+      console.log('➕ Creating backup_deltas table...')
+      await pool.query(`
+        CREATE TABLE "backup_deltas" (
+          "id" serial PRIMARY KEY,
+          "collection_slug" varchar NOT NULL,
+          "resource_type" varchar NOT NULL DEFAULT 'collection',
+          "document_id" varchar,
+          "operation" varchar NOT NULL,
+          "previous_data" jsonb,
+          "current_data" jsonb,
+          "changed_fields" jsonb,
+          "author_id" varchar,
+          "author_email" varchar,
+          "captured_at" timestamp(3) with time zone NOT NULL,
+          "snapshot_id" varchar,
+          "content_hash" varchar
+        );
+      `)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "backup_deltas_collection_slug_idx" ON "backup_deltas" USING btree ("collection_slug");`)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "backup_deltas_document_id_idx" ON "backup_deltas" USING btree ("document_id");`)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "backup_deltas_operation_idx" ON "backup_deltas" USING btree ("operation");`)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "backup_deltas_captured_at_idx" ON "backup_deltas" USING btree ("captured_at");`)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "backup_deltas_snapshot_id_idx" ON "backup_deltas" USING btree ("snapshot_id");`)
+      console.log('✅ backup_deltas table created.')
+    }
+
+    // ========================================
+    // 5. Crear tabla backup_snapshots si no existe
+    // ========================================
+    const backupSnapshotsExists = await pool.query(`
+      SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'backup_snapshots');
+    `)
+    if (!backupSnapshotsExists.rows[0].exists) {
+      console.log('➕ Creating backup_snapshots table...')
+      await pool.query(`
+        CREATE TABLE "backup_snapshots" (
+          "id" serial PRIMARY KEY,
+          "label" varchar NOT NULL,
+          "type" varchar NOT NULL,
+          "status" varchar NOT NULL DEFAULT 'pending',
+          "delta_count" numeric DEFAULT 0,
+          "collections" jsonb,
+          "stats" jsonb,
+          "size_bytes" numeric,
+          "data" jsonb,
+          "storage_type" varchar NOT NULL DEFAULT 'database',
+          "storage_path" varchar,
+          "storage_url" varchar,
+          "content_hash" varchar,
+          "period_start" timestamp(3) with time zone,
+          "period_end" timestamp(3) with time zone,
+          "triggered_by" varchar DEFAULT 'system',
+          "triggered_by_email" varchar,
+          "error_message" varchar,
+          "retention_policy" varchar DEFAULT 'normal',
+          "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+        );
+      `)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "backup_snapshots_type_idx" ON "backup_snapshots" USING btree ("type");`)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "backup_snapshots_status_idx" ON "backup_snapshots" USING btree ("status");`)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "backup_snapshots_created_at_idx" ON "backup_snapshots" USING btree ("created_at");`)
+      console.log('✅ backup_snapshots table created.')
+    }
+
     // Lista de pares [nombre_columna, referencia_tabla]
     const relationsToFix = [
       ['experiencias_id', 'experiencias'],
       ['menus_grupo_id', 'menus_grupo'],
       ['paginas_id', 'paginas'],
+      ['backup_deltas_id', 'backup_deltas'],
+      ['backup_snapshots_id', 'backup_snapshots'],
     ]
 
     const tablesToCheck = [
