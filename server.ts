@@ -270,6 +270,13 @@ async function start() {
   }
   const nextHandler = nextApp.getRequestHandler()
 
+  // Servir estáticos de Astro SOLO para rutas que no son de Next.js
+  // (debe ir después de que nextHandler esté listo pero antes de las rutas)
+  app.use((req, res, next) => {
+    if (/^\/(admin|api|_next)(\/|$)/.test(req.path)) return next()
+    express.static(path.join(__dirname, 'dist/client'), { index: false })(req, res, next)
+  })
+
   // Rate limiting para endpoint de contacto (prevenir SPAM y DoS)
   const contactLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
