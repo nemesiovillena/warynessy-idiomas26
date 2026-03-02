@@ -32,14 +32,16 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.astro
+      dockerfile: Dockerfile
+      target: production
     restart: always
-    # Depends on payload remains unchanged
+    depends_on:
+      - payload
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
-      PORT: 3000
-      DATABASE_URL: "${DATABASE_URL:-postgresql://warynessy:Warynessy2026SecurePass@72.62.183.215:5436/warynessy}"
+      PORT: 4321
+      # Astro no necesita DATABASE_URL, accede a Payload vía API
       PAYLOAD_SECRET: "${PAYLOAD_SECRET}"
       PUBLIC_PAYLOAD_API_URL: https://admin.warynessy.eneweb.es/api
       PUBLIC_SITE_URL: https://warynessy.eneweb.es
@@ -59,7 +61,13 @@ services:
     networks:
       - dokploy-network
     expose:
-      - "3000"
+      - "4321"
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4321" ]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
 
 volumes:
   # Local database volume removed as we use external DB
