@@ -25,7 +25,7 @@ const ChecklistRelationshipInternal: React.FC<any> = (props) => {
             if (!relationTo || typeof relationTo !== 'string') return
 
             // Si ya hay una petición en curso para esta colección, esperamos a esa
-            if (globalInFlightRequests[relationTo]) {
+            if (globalInFlightRequests[relationTo] !== undefined) {
                 try {
                     const data = await globalInFlightRequests[relationTo]
                     if (isMounted) {
@@ -42,11 +42,11 @@ const ChecklistRelationshipInternal: React.FC<any> = (props) => {
             }
 
             const fetchPromise = (async () => {
-                const origin = typeof window !== 'undefined' ? window.location.origin : ''
+                // Usar solo config.serverURL para evitar errores de hidratación
+                // En SSR, config.serverURL ya tiene la URL correcta
                 const endpoints = [
-                    `${origin}/api/${relationTo}?limit=100&depth=0`,
+                    `${config.serverURL || ''}/api/${relationTo}?limit=100&depth=0`,
                     `/api/${relationTo}?limit=100&depth=0`,
-                    `${config.serverURL || ''}/api/${relationTo}?limit=100&depth=0`
                 ]
 
                 for (const url of endpoints) {
