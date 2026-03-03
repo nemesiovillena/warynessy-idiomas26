@@ -93,23 +93,42 @@ async function runDatabaseHotfix() {
     }
 
     // ========================================
-    // 2. Sanear tabla paginas si tiene schema incorrecto
-    // La tabla fue creada manualmente con schema plano, pero Payload
-    // necesita su propio schema (con tabs genera columnas diferentes).
-    // Si existe pero le falta la columna "hero_image_id" que Payload genera
-    // como "hero_image_id" y tiene "imagen_espacio1_id" (schema manual viejo),
-    // la dropeamos para que Payload la recree correctamente con push:true.
+    // 2. Crear tabla paginas si no existe
     // ========================================
-    const paginasOldSchema = await pool.query(`
+    const paginasExists = await pool.query(`
       SELECT EXISTS (
-        SELECT FROM information_schema.columns
-        WHERE table_name = 'paginas' AND column_name = 'imagen_espacio1_id'
+        SELECT FROM information_schema.tables
+        WHERE table_name = 'paginas'
       );
     `)
-    if (paginasOldSchema.rows[0].exists) {
-      console.log('🗑️ Dropping paginas table (old manual schema) so Payload can recreate it...')
-      await pool.query(`DROP TABLE IF EXISTS "paginas" CASCADE;`)
-      console.log('✅ paginas table dropped. Payload will recreate it on startup.')
+
+    if (!paginasExists.rows[0].exists) {
+      console.log('➕ Creating paginas table...')
+      await pool.query(`
+        CREATE TABLE "paginas" (
+          "id" serial PRIMARY KEY,
+          "titulo_interno" varchar NOT NULL,
+          "slug" varchar NOT NULL UNIQUE,
+          "hero_image_id" integer,
+          "hero_title" varchar,
+          "hero_subtitle" varchar,
+          "imagen_espacio1_id" integer,
+          "imagen_espacio2_id" integer,
+          "imagen_espacio3_id" integer,
+          "imagen_espacio4_id" integer,
+          "meta_title" varchar,
+          "meta_description" varchar,
+          "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+        );
+      `)
+      console.log('✅ paginas table created.')
+
+      // Crear índices
+      await pool.query(`CREATE INDEX IF NOT EXISTS "paginas_slug_idx" ON "paginas" USING btree ("slug");`)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "paginas_hero_image_idx" ON "paginas" USING btree ("hero_image_id");`)
+      await pool.query(`CREATE INDEX IF NOT EXISTS "paginas_created_at_idx" ON "paginas" USING btree ("created_at");`)
+      console.log('✅ paginas indexes created.')
     }
 
     // ========================================
