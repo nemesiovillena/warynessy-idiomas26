@@ -10,7 +10,7 @@ services:
     # Depends on db removed as we use external DB
     environment:
       NODE_ENV: production
-      PORT: 3000
+      PORT: 3001
       HOSTNAME: 0.0.0.0
       DATABASE_URL: "${DATABASE_URL:-postgresql://warynessy:Warynessy2026SecurePass@72.62.183.215:5436/warynessy}"
       PAYLOAD_SECRET: "${PAYLOAD_SECRET}"
@@ -25,7 +25,7 @@ services:
     networks:
       - dokploy-network
     expose:
-      - "3000"
+      - "3001"
     volumes:
       - warynessy_media:/app/public/media
 
