@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { callTranslationAgent } from '../utils/translation-utils'
 
 export const Categorias: CollectionConfig = {
   slug: 'categorias',
@@ -14,12 +15,63 @@ export const Categorias: CollectionConfig = {
   access: {
     read: () => true, // Public read access
   },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        if (operation === 'create' || operation === 'update') {
+          const payload = req.payload;
+          try {
+            if ((req as any).locale !== 'es') return;
+
+            console.log(`[CATEGORIAS] Iniciando traducción automática para: ${doc.nombre}`);
+
+            const configTraduccion: any = await payload.findGlobal({ slug: 'configuracion-traduccion' as any });
+            const endpoint = configTraduccion?.endpointAgente || 'http://localhost:8000/translate';
+            const modelo = configTraduccion?.modeloIA || 'google/gemini-2.0-flash-001';
+
+            const targetLocales = ['ca', 'en', 'fr', 'de'] as const;
+            const fieldsToTranslate = ['nombre', 'descripcion'];
+
+            await Promise.all(targetLocales.map(async (locale) => {
+              const translatedData: any = {};
+              let hasTranslations = false;
+
+              await Promise.all(fieldsToTranslate.map(async (field) => {
+                const value = doc[field];
+                const prevValue = previousDoc?.[field];
+                const changed = operation === 'create' || value !== prevValue;
+                if (changed && value && typeof value === 'string' && value.trim().length > 0) {
+                  console.log(`[CATEGORIAS] Traduciendo ${field} al locale ${locale}...`);
+                  translatedData[field] = await callTranslationAgent(value, locale, endpoint, modelo);
+                  hasTranslations = true;
+                }
+              }));
+
+              if (hasTranslations) {
+                console.log(`[CATEGORIAS] Aplicando traducciones a locale ${locale}...`);
+                await (payload as any).update({
+                  collection: 'categorias',
+                  id: doc.id,
+                  locale: locale as any,
+                  data: translatedData,
+                  req: { ...req, disableHooks: true } as any,
+                });
+              }
+            }));
+          } catch (error) {
+            console.error('[CATEGORIAS] Error en hook de traducción:', error);
+          }
+        }
+      }
+    ]
+  },
   fields: [
     {
       name: 'nombre',
       type: 'text',
       label: 'Nombre de la Categoría',
       required: true,
+      localized: true,
       admin: {
         description: 'Ej: Entrantes, Carnes, Pescados, Postres, etc.',
       },
@@ -53,6 +105,7 @@ export const Categorias: CollectionConfig = {
       name: 'descripcion',
       type: 'textarea',
       label: 'Descripción',
+      localized: true,
       admin: {
         description: 'Descripción opcional de la categoría',
       },

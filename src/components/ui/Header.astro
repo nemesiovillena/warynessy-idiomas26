@@ -1,16 +1,17 @@
 ---
 import { getSiteSettings } from '../../lib/payload-local';
+import LanguageSelector from './LanguageSelector.astro';
+import { getNavLinks, navReserveNow } from '../../lib/i18n';
 
 // Fetch site settings for logo and title
 const siteSettings = await getSiteSettings();
 
-const navLinks = [
-  { name: "Carta", href: "/carta" },
-  { name: "Menús", href: "/menus" },
-  { name: "Reservas", href: "/reservas" },
-  { name: "Contacto", href: "/contacto" },
-  { name: "Experiencias", href: "/experiencias" },
-];
+const { locale: propsLocale } = Astro.props;
+const { lang } = Astro.params;
+const locale = propsLocale || lang || 'es';
+
+const navLinks = getNavLinks(locale);
+const reservaNow = navReserveNow[locale] ?? navReserveNow.es;
 ---
 
 <nav 
@@ -21,7 +22,7 @@ const navLinks = [
   <div class="flex items-center gap-8 pointer-events-auto bg-black/20 backdrop-blur-md px-6 py-3 rounded-full border border-white/10">
     
     {/* Logo inside menu */}
-    <a href="/" class="group block mr-4" data-track="logo_click" data-track-category="navigation">
+    <a href={`/${locale}`} class="group block mr-4" data-track="logo_click" data-track-category="navigation">
       <img 
         src="/images/logo-warynessy.svg" 
         alt="Warynessy Logo" 
@@ -41,12 +42,16 @@ const navLinks = [
         </a>
       ))}
       <div class="h-4 w-px bg-white/30"></div>
+      <LanguageSelector />
     </div>
 
     {/* Icons/Actions */}
     <div class="flex items-center gap-4">
+      <div class="lg:hidden">
+        <LanguageSelector />
+      </div>
 
-      <button id="menu-toggle" class="text-white flex items-center justify-center hover:text-primary transition-colors lg:hidden">
+      <button id="menu-toggle" class="text-white flex items-center justify-center hover:text-primary transition-colors lg:hidden ml-2">
         <span class="material-symbols-outlined">menu</span>
       </button>
     </div>
@@ -61,11 +66,11 @@ const navLinks = [
   <button id="menu-close" class="absolute top-8 right-8 text-white">
     <span class="material-symbols-outlined text-4xl">close</span>
   </button>
-  
+
   <nav class="flex flex-col items-center gap-8 text-center p-6">
     {navLinks.map(link => (
-      <a 
-        href={link.href} 
+      <a
+        href={link.href}
         class="mobile-link text-4xl font-display font-medium text-white hover:text-primary transition-colors transform translate-y-4 opacity-0"
       >
         {link.name}
@@ -73,12 +78,12 @@ const navLinks = [
     ))}
     <div class="mobile-link transform translate-y-4 opacity-0 mt-4">
       <a 
-        href="/reservas" 
+        href={`/${locale}/reservas`} 
         class="inline-block px-10 py-4 bg-accent-red text-white rounded-lg text-lg font-bold tracking-widest uppercase hover:bg-primary transition-transform hover:scale-105 shadow-xl shadow-accent-red/20"
         data-track="reservation_click"
         data-track-category="mobile_menu"
       >
-        Reserva Ahora
+        {reservaNow}
       </a>
     </div>
   </nav>

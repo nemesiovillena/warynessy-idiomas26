@@ -15,6 +15,18 @@ const {
 	type = "website"
 } = Astro.props;
 
+const { lang } = Astro.params;
+const locale = lang || 'es';
+
+const localeMap: Record<string, string> = {
+  'es': 'es_ES',
+  'ca': 'ca_ES',
+  'en': 'en_US',
+  'fr': 'fr_FR',
+  'de': 'de_DE'
+};
+const ogLocale = localeMap[locale] || 'es_ES';
+
 const siteTitle = `${title} | Restaurante Warynessy`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(image, Astro.url);
@@ -42,7 +54,7 @@ const socialImageURL = new URL(image, Astro.url);
 <meta property="og:title" content={siteTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={socialImageURL} />
-<meta property="og:locale" content="es_ES" />
+<meta property="og:locale" content={ogLocale} />
 <meta property="og:site_name" content="Restaurante Warynessy" />
 
 <!-- Twitter -->

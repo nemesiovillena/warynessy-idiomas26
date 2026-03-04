@@ -11,16 +11,17 @@ interface Props {
 	image?: string;
 	schemaType?: 'Restaurant' | 'Menu' | 'Article';
   schemaData?: Record<string, any>;
+  locale?: string;
 }
 
-const { title, description, image, schemaType = 'Restaurant', schemaData } = Astro.props;
+const { title, description, image, schemaType = 'Restaurant', schemaData, locale } = Astro.props;
 
 // Google Analytics 4 - Solo se carga si está configurado
 const gaId = import.meta.env.PUBLIC_GOOGLE_ANALYTICS_ID;
 ---
 
 <!doctype html>
-<html lang="es" class="scroll-smooth">
+<html lang={locale || 'es'} class="scroll-smooth">
 	<head>
 		<SEO title={title} description={description} image={image} />
 		<Schema type={schemaType} data={schemaData} />

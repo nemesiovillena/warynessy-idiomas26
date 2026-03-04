@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { callTranslationAgent, translateLexical } from '../utils/translation-utils'
 
 export const Menus: CollectionConfig = {
   slug: 'menus',
@@ -14,12 +15,68 @@ export const Menus: CollectionConfig = {
   access: {
     read: () => true, // Public read access
   },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        if (operation === 'create' || operation === 'update') {
+          const payload = req.payload;
+          try {
+            // Evitar bucles: solo traducir si el locale de la petición es 'es'
+            if ((req as any).locale !== 'es') return;
+
+            console.log(`[MENUS] Iniciando traducción automática para: ${doc.nombre}`);
+
+            const configTraduccion: any = await payload.findGlobal({ slug: 'configuracion-traduccion' as any });
+            const endpoint = configTraduccion?.endpointAgente || 'http://localhost:8000/translate';
+            const modelo = configTraduccion?.modeloIA || 'google/gemini-2.0-flash-001';
+
+            const targetLocales = ['ca', 'en', 'fr', 'de'] as const;
+            const fieldsToTranslate = ['nombre', 'etiqueta', 'descripcion_menu', 'fechasDias', 'descripcion'];
+
+            await Promise.all(targetLocales.map(async (locale) => {
+              const translatedData: any = {};
+              let hasTranslations = false;
+
+              await Promise.all(fieldsToTranslate.map(async (field) => {
+                const value = doc[field];
+                if (!value) return;
+                const prevValue = previousDoc?.[field];
+                const changed = operation === 'create' || JSON.stringify(value) !== JSON.stringify(prevValue);
+                if (!changed) return;
+                if (typeof value === 'object' && value !== null && value.root) {
+                  translatedData[field] = await translateLexical(value, locale, endpoint, modelo);
+                  hasTranslations = true;
+                } else if (typeof value === 'string' && value.trim().length > 0) {
+                  translatedData[field] = await callTranslationAgent(value, locale, endpoint, modelo);
+                  hasTranslations = true;
+                }
+              }));
+
+              if (hasTranslations) {
+                console.log(`[MENUS] Aplicando traducciones a locale ${locale}...`);
+                await (payload as any).update({
+                  collection: 'menus',
+                  id: doc.id,
+                  locale: locale as any,
+                  data: translatedData,
+                  req: { ...req, disableHooks: true } as any,
+                });
+              }
+            }));
+          } catch (error) {
+            console.error('[MENUS] Error en hook de traducción:', error);
+          }
+        }
+      }
+    ]
+  },
   fields: [
     {
       name: 'nombre',
       type: 'text',
       label: 'Nombre del Menú',
       required: true,
+      localized: true,
       admin: {
         description: 'Ej: Menú del Día, Menú Degustación, Menú San Valentín, etc.',
       },
@@ -28,6 +85,7 @@ export const Menus: CollectionConfig = {
       name: 'etiqueta',
       type: 'text',
       label: 'Etiqueta (Badge)',
+      localized: true,
       admin: {
         description: 'Pequeño texto decorativo (ej: "Popular", "Exclusivo", "Nuevo")',
       },
@@ -71,6 +129,7 @@ export const Menus: CollectionConfig = {
       name: 'descripcion_menu',
       type: 'textarea',
       label: 'Información',
+      localized: true,
       admin: {
         description: 'Ej: "Este menú se ofrece de miércoles a viernes mediodía. A partir de 2 personas."',
       },
@@ -79,6 +138,7 @@ export const Menus: CollectionConfig = {
       name: 'fechasDias',
       type: 'text',
       label: 'Etiqueta de disponibilidad',
+      localized: true,
       admin: {
         description: 'Texto corto para badge (ej: "Entre semana", "Fines de semana")',
       },

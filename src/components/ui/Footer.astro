@@ -1,12 +1,17 @@
 ---
 import { getSiteSettings } from '../../lib/payload-local';
 import Button from './Button.astro';
+import { getTranslations } from '../../lib/i18n';
+
+const { locale: propsLocale, hideFloatingButton = false } = Astro.props;
+const { lang } = Astro.params;
+const locale = propsLocale || lang || 'es';
 
 // Query to fetch global site settings
-const settings = await getSiteSettings();
+const settings = await getSiteSettings(locale);
 
 const currentYear = new Date().getFullYear();
-const { hideFloatingButton = false } = Astro.props;
+const t = getTranslations(locale).footer;
 ---
 
 <footer class="bg-matte-black text-white/50 border-t border-white/5">
@@ -33,36 +38,36 @@ const { hideFloatingButton = false } = Astro.props;
       <div class="flex flex-col items-center text-center gap-6">
         {/* Horario */}
         <div class="flex flex-col gap-3">
-          <h3 class="text-primary font-semibold uppercase tracking-wider text-sm">Horario</h3>
+          <h3 class="text-primary font-semibold uppercase tracking-wider text-sm">{t.schedule}</h3>
           <div class="text-sm text-white/70 leading-relaxed">
             {settings?.openingHours && settings.openingHours.length > 0 ? (
               settings.openingHours.map((schedule: any) => (
                 <p>
-                  {schedule.days}: {schedule.closed ? "Cerrado" : schedule.hours}
+                  {schedule.days}: {schedule.closed ? t.closed : schedule.hours}
                 </p>
               ))
             ) : (
               <>
-                <p>De miércoles a domingo mediodía: de 13:30 a 17:00 horas.</p>
-                <p>Viernes y sábado noche: de 20:00 a 0:00 horas.</p>
+                <p>{t.fallbackSchedule1}</p>
+                <p>{t.fallbackSchedule2}</p>
               </>
             )}
           </div>
         </div>
 
         {/* Botón Reserva */}
-        <Button href="/reservas" variant="primary" size="md" trackEvent="reservation_click" trackCategory="footer">
-          Reservar
+        <Button href={`/${locale}/reservas`} variant="primary" size="md" trackEvent="reservation_click" trackCategory="footer">
+          {t.reserve}
         </Button>
 
         {/* Trabaja con nosotros */}
         <a
-          href="mailto:info@warynessy.com?subject=Trabaja con nosotros"
+          href={`mailto:info@warynessy.com?subject=${t.workWithUs}`}
           class="text-sm text-white/50 hover:text-primary transition-colors underline underline-offset-2"
           data-track="email_click"
           data-track-category="footer_jobs"
         >
-          Trabaja con nosotros
+          {t.workWithUs}
         </a>
       </div>
 
@@ -145,9 +150,9 @@ const { hideFloatingButton = false } = Astro.props;
         </span>
       </p>
       <div class="flex gap-6">
-        <a class="hover:text-primary transition-colors" href="/aviso-legal">Aviso legal</a>
-        <a class="hover:text-primary transition-colors" href="/cookies">Política de cookies</a>
-        <a class="hover:text-primary transition-colors" href="/privacidad">Política de privacidad</a>
+        <a class="hover:text-primary transition-colors" href={`/${locale}/aviso-legal`}>{t.legal}</a>
+        <a class="hover:text-primary transition-colors" href={`/${locale}/cookies`}>{t.cookies}</a>
+        <a class="hover:text-primary transition-colors" href={`/${locale}/privacidad`}>{t.privacy}</a>
       </div>
     </div>
   </div>
@@ -174,7 +179,7 @@ const { hideFloatingButton = false } = Astro.props;
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.631 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
           </svg>
         </div>
-        <span class="whitespace-nowrap opacity-0 w-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:w-auto group-hover:ml-3 uppercase font-bold text-xs tracking-widest text-white delay-100">Necesitas ayuda</span>
+        <span class="whitespace-nowrap opacity-0 w-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:w-auto group-hover:ml-3 uppercase font-bold text-xs tracking-widest text-white delay-100">{t.help}</span>
       </a>
     </div>
   );

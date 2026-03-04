@@ -1,4 +1,3 @@
-'use client'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useField, useConfig, FieldLabel, useDocumentInfo } from '@payloadcms/ui'
 
@@ -25,7 +24,7 @@ const ChecklistRelationshipInternal: React.FC<any> = (props) => {
             if (!relationTo || typeof relationTo !== 'string') return
 
             // Si ya hay una petición en curso para esta colección, esperamos a esa
-            if (globalInFlightRequests[relationTo]) {
+            if (relationTo in globalInFlightRequests) {
                 try {
                     const data = await globalInFlightRequests[relationTo]
                     if (isMounted) {

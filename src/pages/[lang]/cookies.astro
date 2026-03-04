@@ -1,0 +1,98 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Section from '../../components/ui/Section.astro';
+import Container from '../../components/ui/Container.astro';
+
+const { lang } = Astro.params;
+const locale = lang || 'es';
+
+const pageTitle = "Política de Cookies | Warynessy";
+---
+
+<MainLayout title={pageTitle}>
+  <Section class="py-32 bg-white min-h-screen">
+    <Container class="max-w-4xl">
+      <h1 class="text-4xl font-serif font-bold mb-8 text-gray-900">Política de Cookies</h1>
+      <div class="prose prose-lg max-w-none text-gray-700">
+
+        <p>En cumplimiento con lo dispuesto en el artículo 22.2 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico, esta página web le informa, en esta sección, sobre la política de recogida y tratamiento de cookies.</p>
+
+        <h2>1. ¿Qué son las cookies?</h2>
+        <p>Una cookie es un fichero que se descarga en su ordenador al acceder a determinadas páginas web. Las cookies permiten a una página web, entre otras cosas, almacenar y recuperar información sobre los hábitos de navegación de un usuario o de su equipo y, dependiendo de la información que contengan y de la forma en que utilice su equipo, pueden utilizarse para reconocer al usuario.</p>
+
+        <h2>2. Tipos de cookies que utiliza esta web</h2>
+
+        <h3>Cookies técnicas</h3>
+        <p>Son aquellas que permiten al usuario la navegación a través de una página web y la utilización de las diferentes opciones o servicios que en ella existan. Son necesarias para el funcionamiento básico del sitio.</p>
+
+        <h3>Cookies analíticas</h3>
+        <p>Son aquellas que permiten el seguimiento y análisis del comportamiento de los usuarios de los sitios web. La información recogida se utiliza para la medición de la actividad del sitio web y para la elaboración de perfiles de navegación, con el fin de introducir mejoras.</p>
+        <ul>
+          <li><strong>Google Analytics:</strong> Cookies de análisis de tráfico web (_ga, _gid, _gat). Permiten conocer el número de visitantes, páginas visitadas, tiempo de permanencia, etc. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Política de privacidad de Google</a>.</li>
+        </ul>
+
+        <h3>Cookies de terceros</h3>
+        <p>Nuestra web puede incluir funcionalidades de terceros que utilizan sus propias cookies:</p>
+        <ul>
+          <li><strong>Google Maps:</strong> Para mostrar el mapa de ubicación del restaurante.</li>
+          <li><strong>CoverManager:</strong> Para el widget de reservas integrado.</li>
+        </ul>
+
+        <h2>3. Cookies utilizadas en este sitio</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Tipo</th>
+              <th>Finalidad</th>
+              <th>Duración</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>_ga</td>
+              <td>Analítica</td>
+              <td>Distinguir usuarios únicos (Google Analytics)</td>
+              <td>2 años</td>
+            </tr>
+            <tr>
+              <td>_gid</td>
+              <td>Analítica</td>
+              <td>Distinguir usuarios (Google Analytics)</td>
+              <td>24 horas</td>
+            </tr>
+            <tr>
+              <td>_gat</td>
+              <td>Analítica</td>
+              <td>Limitar el porcentaje de solicitudes</td>
+              <td>1 minuto</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>4. Desactivación o eliminación de cookies</h2>
+        <p>Puede usted permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones del navegador instalado en su ordenador:</p>
+        <ul>
+          <li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener">Google Chrome</a></li>
+          <li><a href="https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias" target="_blank" rel="noopener">Mozilla Firefox</a></li>
+          <li><a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" target="_blank" rel="noopener">Safari</a></li>
+          <li><a href="https://support.microsoft.com/es-es/windows/administrar-cookies-en-microsoft-edge-ver-permitir-bloquear-eliminar-y-usar-168dab11-0753-043d-7c16-ede5947fc64d" target="_blank" rel="noopener">Microsoft Edge</a></li>
+        </ul>
+
+        <h2>5. Aceptación de la política de cookies</h2>
+        <p>Al navegar por este sitio web, el usuario acepta que se puedan instalar cookies en su terminal y que nos permiten conocer información como la siguiente:</p>
+        <ul>
+          <li>Información estadística del uso de la web.</li>
+          <li>El inicio de sesión del usuario para mantener la sesión activa en la web.</li>
+          <li>El formato de la web preferente en el acceso desde dispositivos móviles.</li>
+        </ul>
+        <p>El usuario puede revocar su consentimiento en cualquier momento modificando la configuración de su navegador para rechazar las cookies.</p>
+
+        <h2>6. Actualización de la política de cookies</h2>
+        <p>Restaurante Warynessy puede modificar esta Política de Cookies en función de exigencias legislativas, reglamentarias, o con la finalidad de adaptar dicha política a las instrucciones dictadas por la Agencia Española de Protección de Datos.</p>
+
+        <p class="text-sm text-gray-500 mt-12 italic">Última actualización: Enero 2026</p>
+      </div>
+    </Container>
+  </Section>
+</MainLayout>

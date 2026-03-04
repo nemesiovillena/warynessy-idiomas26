@@ -28,6 +28,13 @@ export default defineConfig({
       }
     }
   },
+  i18n: {
+    defaultLocale: 'es',
+    locales: ['es', 'ca', 'en', 'fr', 'de'],
+    routing: {
+      prefixDefaultLocale: true
+    }
+  },
   integrations: [sitemap()],
   site: 'https://warynessy.com'
 });

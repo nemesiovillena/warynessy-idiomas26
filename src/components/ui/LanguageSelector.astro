@@ -1,0 +1,77 @@
+---
+/**
+ * LanguageSelector Component
+ * Permite cambiar el idioma del sitio con un diseño elegante y moderno.
+ */
+import { getTranslations } from '../../lib/i18n';
+
+const { currentLocale } = Astro;
+
+const languages = [
+  { code: 'es', label: 'Castellano', flag: '🇪🇸' },
+  { code: 'ca', label: 'Valencià', flag: '🚩' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+];
+
+const currentLanguage = languages.find(l => l.code === (currentLocale || 'es')) || languages[0];
+const selectLabel = getTranslations(currentLocale || 'es').langSelector.label;
+
+// Obtener la ruta actual sin el prefijo del idioma
+const pathname = Astro.url.pathname;
+const segments = pathname.split('/').filter(Boolean);
+// Si el primer segmento es un código de idioma, lo quitamos
+const cleanPathname = languages.some(l => l.code === segments[0]) 
+  ? '/' + segments.slice(1).join('/') 
+  : pathname;
+
+function getUrlForLocale(localeCode: string) {
+  return `/${localeCode}${cleanPathname}`.replace(/\/+$/, '') || `/${localeCode}`;
+}
+---
+
+<div class="relative group" id="language-selector">
+  <button
+    type="button"
+    class="flex items-center gap-2 px-3 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:border-white/30 transition-all duration-300"
+    aria-expanded="false"
+    aria-haspopup="true"
+  >
+    <span class="text-lg leading-none">{currentLanguage.flag}</span>
+    <span class="text-sm font-medium hidden md:inline uppercase">{currentLanguage.code}</span>
+    <span class="material-symbols-outlined text-sm transition-transform duration-300 group-focus-within:rotate-180">expand_more</span>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <div
+    class="absolute right-0 top-full mt-2 w-48 py-2 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl shadow-2xl opacity-0 invisible translate-y-2 group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 transition-all duration-300 z-50 overflow-hidden"
+  >
+    <div class="px-4 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
+      {selectLabel}
+    </div>
+    {languages.map((lang) => (
+      <a
+        href={getUrlForLocale(lang.code)}
+        class={`flex items-center justify-between px-4 py-3 text-sm transition-colors hover:bg-white/10 ${
+          lang.code === currentLanguage.code ? 'text-primary font-bold bg-white/5' : 'text-white/70'
+        }`}
+      >
+        <div class="flex items-center gap-3">
+          <span class="text-lg leading-none">{lang.flag}</span>
+          <span>{lang.label}</span>
+        </div>
+        {lang.code === currentLanguage.code && (
+          <span class="material-symbols-outlined text-sm">check</span>
+        )}
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  #language-selector:focus-within button {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+  }
+</style>

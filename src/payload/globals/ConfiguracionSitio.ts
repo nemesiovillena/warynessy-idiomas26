@@ -1,10 +1,61 @@
 import type { GlobalConfig } from 'payload'
+import { callTranslationAgent } from '../utils/translation-utils'
 
 export const ConfiguracionSitio: GlobalConfig = {
   slug: 'configuracion-sitio',
   label: 'Configuración del Sitio',
   access: {
     read: () => true, // Public read access
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        if ((req as any).locale !== 'es') return;
+
+        const payload = req.payload;
+        const configTraduccion: any = await payload.findGlobal({ slug: 'configuracion-traduccion' as any });
+        const endpoint = configTraduccion?.endpointAgente || 'http://localhost:8000/translate';
+        const modelo = configTraduccion?.modeloIA || 'google/gemini-2.0-flash-001';
+
+        const targetLocales = ['ca', 'en', 'fr', 'de'] as const;
+
+        const prevHours: any[] = (previousDoc as any)?.openingHours || [];
+        const currHours: any[] = doc.openingHours || [];
+
+        // Detectar filas que cambiaron en days u hours
+        const changedIndexes = currHours.reduce<number[]>((acc, row, i) => {
+          const prev = prevHours[i];
+          if (!prev || row.days !== prev.days || row.hours !== prev.hours) acc.push(i);
+          return acc;
+        }, []);
+
+        if (changedIndexes.length === 0) return;
+
+        console.log(`[CONFIG-SITIO] Traduciendo ${changedIndexes.length} filas de horario...`);
+
+        await Promise.all(targetLocales.map(async (locale) => {
+          const translatedHours = currHours.map((row: any) => ({ ...row }));
+
+          await Promise.all(changedIndexes.map(async (i) => {
+            const row = currHours[i];
+            if (row.days?.trim()) {
+              translatedHours[i].days = await callTranslationAgent(row.days, locale, endpoint, modelo);
+            }
+            if (row.hours?.trim()) {
+              translatedHours[i].hours = await callTranslationAgent(row.hours, locale, endpoint, modelo);
+            }
+          }));
+
+          await payload.updateGlobal({
+            slug: 'configuracion-sitio',
+            locale: locale as any,
+            data: { openingHours: translatedHours },
+          });
+        }));
+
+        console.log(`[CONFIG-SITIO] Horarios traducidos.`);
+      }
+    ]
   },
   fields: [
     {
@@ -124,6 +175,7 @@ export const ConfiguracionSitio: GlobalConfig = {
           name: 'days',
           type: 'text',
           label: 'Días',
+          localized: true,
           admin: {
             description: 'Ej: "Lunes a Viernes", "Sábados", etc.',
           },
@@ -132,6 +184,7 @@ export const ConfiguracionSitio: GlobalConfig = {
           name: 'hours',
           type: 'text',
           label: 'Horario',
+          localized: true,
           admin: {
             description: 'Ej: "13:00 - 16:00 y 20:00 - 23:00"',
           },

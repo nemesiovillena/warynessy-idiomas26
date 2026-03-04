@@ -1,0 +1,534 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import Section from '../../components/ui/Section.astro';
+import Container from '../../components/ui/Container.astro';
+import Button from '../../components/ui/Button.astro';
+import ResponsiveImage from '../../components/ui/ResponsiveImage.astro';
+import SpaceCard from '../../components/content/SpaceCard.astro';
+import { getSiteSettings, getHomepage, getSpaces, getFeaturedDishes } from '../../lib/payload-local';
+import { getGoogleReviews } from '../../lib/google-reviews';
+import { getInstagramFeed } from '../../lib/instagram';
+import { getOptimizedImageUrl } from '../../lib/cdn';
+
+const { lang } = Astro.params;
+const locale = lang || 'es';
+
+// Fetch data from Payload CMS (Local API) with locale
+const siteSettings = await getSiteSettings(locale);
+const homepage = await getHomepage(locale);
+const spaces = await getSpaces(true, locale);
+const featuredDishes = await getFeaturedDishes(locale);
+const rawOpiniones = await getGoogleReviews(); 
+// Filtrar por 4-5 estrellas y ordenar por las más recientes
+const opiniones = rawOpiniones
+  ?.filter((review: any) => review.rating >= 4)
+  .sort((a: any, b: any) => b.time - a.time);
+
+const instagramConfig = siteSettings?.instagramConfig || { method: 'api' };
+const instagramPosts = await getInstagramFeed(6);
+
+const pageTitle = siteSettings?.title || "Warynessy 2026";
+
+const _t = {
+  es: {
+    schedule: "Horario",
+    goToReservations: "Ir a Reservas",
+    giftTitle: "Regala Gastronomía",
+    giftDesc: "Sorprende a tus seres queridos con una experiencia sensorial inolvidable en nuestro restaurante.",
+    buyGiftCard: "Comprar Tarjeta Regalo",
+    spacesTitle: "Nuestros Espacios",
+    spacesDesc: "Atmósferas únicas diseñadas para elevar cada momento.",
+    discoverSpaces: "Descubrir todos los espacios",
+    closed: "Cerrado",
+    heroTitle: "Sabor & Vanguardia",
+    heroSubtitle: "Una experiencia gastronómica única en el corazón de Alicante.",
+    bookTable: "Reserva Mesa",
+    storyTitle: "Nuestra Historia",
+    storyText: "Ubicados en el corazón de Alicante, nuestra historia es una de pasión por el producto local y la excelencia gastronómica.",
+    reviewsTitle: "Opiniones de Clientes",
+    reviewsSource: "Google Reviews",
+    loadingReviews: "Esperando opiniones reales de Google...",
+    instagramTitle: "Instagram",
+    viewInstagram: "Ver Instagram",
+    loadingInstagram: "Cargando feed de Instagram...",
+    restaurantInterior: "Interior del restaurante",
+    restaurantSpace: "Espacio del restaurante"
+  },
+  ca: {
+    schedule: "Horari",
+    goToReservations: "Anar a Reserves",
+    giftTitle: "Regala Gastronomia",
+    giftDesc: "Sorprèn els teus éssers estimats amb una experiència sensorial inoblidable al nostre restaurant.",
+    buyGiftCard: "Comprar Targeta Regal",
+    spacesTitle: "Els Nostres Espais",
+    spacesDesc: "Atmosferes úniques dissenyades per elevar cada moment.",
+    discoverSpaces: "Descobrir tots els espais",
+    closed: "Tancat",
+    heroTitle: "Sabor & Avantguarda",
+    heroSubtitle: "Una experiència gastronòmica única al cor d'Alacant.",
+    bookTable: "Reserva Mesa",
+    storyTitle: "La Nostra Història",
+    storyText: "Ubicats al cor d'Alacant, la nostra història és una de passió pel producte local i l'excel·lència gastronòmica.",
+    reviewsTitle: "Opinions de Clients",
+    reviewsSource: "Google Reviews",
+    loadingReviews: "Esperant opinions reals de Google...",
+    instagramTitle: "Instagram",
+    viewInstagram: "Veure Instagram",
+    loadingInstagram: "Carregant feed d'Instagram...",
+    restaurantInterior: "Interior del restaurant",
+    restaurantSpace: "Espai del restaurant"
+  },
+  en: {
+    schedule: "Opening Hours",
+    goToReservations: "Go to Reservations",
+    giftTitle: "Gift Gastronomy",
+    giftDesc: "Surprise your loved ones with an unforgettable sensory experience in our restaurant.",
+    buyGiftCard: "Buy Gift Card",
+    spacesTitle: "Our Spaces",
+    spacesDesc: "Unique atmospheres designed to elevate every moment.",
+    discoverSpaces: "Discover all spaces",
+    closed: "Closed",
+    heroTitle: "Taste & Avant-garde",
+    heroSubtitle: "A unique gastronomic experience in the heart of Alicante.",
+    bookTable: "Book a Table",
+    storyTitle: "Our Story",
+    storyText: "Located in the heart of Alicante, our story is one of passion for local products and gastronomic excellence.",
+    reviewsTitle: "Customer Reviews",
+    reviewsSource: "Google Reviews",
+    loadingReviews: "Waiting for real Google reviews...",
+    instagramTitle: "Instagram",
+    viewInstagram: "View Instagram",
+    loadingInstagram: "Loading Instagram feed...",
+    restaurantInterior: "Restaurant interior",
+    restaurantSpace: "Restaurant space"
+  },
+  fr: {
+    schedule: "Horaires",
+    goToReservations: "Aller aux Réservations",
+    giftTitle: "Offrez de la Gastronomie",
+    giftDesc: "Surprenez vos proches avec une expérience sensorielle inoubliable dans notre restaurant.",
+    buyGiftCard: "Acheter une carte-cadeau",
+    spacesTitle: "Nos Espaces",
+    spacesDesc: "Des atmosphères uniques conçues pour sublimer chaque instant.",
+    discoverSpaces: "Découvrir tous les espaces",
+    closed: "Fermé",
+    heroTitle: "Saveur & Avant-garde",
+    heroSubtitle: "Une expérience gastronomique unique au cœur d'Alicante.",
+    bookTable: "Réserver une Table",
+    storyTitle: "Notre Histoire",
+    storyText: "Située au cœur d'Alicante, notre histoire est celle d'une passion pour les produits locaux et l'excellence gastronomique.",
+    reviewsTitle: "Avis des Clients",
+    reviewsSource: "Avis Google",
+    loadingReviews: "En attente de vrais avis Google...",
+    instagramTitle: "Instagram",
+    viewInstagram: "Voir Instagram",
+    loadingInstagram: "Chargement du flux Instagram...",
+    restaurantInterior: "Intérieur du restaurant",
+    restaurantSpace: "Espace du restaurant"
+  },
+  de: {
+    schedule: "Öffnungszeiten",
+    goToReservations: "Zu den Reservierungen",
+    giftTitle: "Gastronomie verschenken",
+    giftDesc: "Überraschen Sie Ihre Liebsten mit einem unvergesslichen sensorischen Erlebnis in unserem Restaurant.",
+    buyGiftCard: "Gutschein kaufen",
+    spacesTitle: "Unsere Räumlichkeiten",
+    spacesDesc: "Einzigartige Atmosphären, die jeden Moment bereichern.",
+    discoverSpaces: "Alle Räume entdecken",
+    closed: "Geschlossen",
+    heroTitle: "Geschmack & Avantgarde",
+    heroSubtitle: "Ein einzigartiges gastronomisches Erlebnis im Herzen von Alicante.",
+    bookTable: "Tisch reservieren",
+    storyTitle: "Unsere Geschichte",
+    storyText: "Im Herzen von Alicante gelegen, ist unsere Geschichte von der Leidenschaft für lokale Produkte und gastronomische Exzellenz geprägt.",
+    reviewsTitle: "Kundenbewertungen",
+    reviewsSource: "Google Rezensionen",
+    loadingReviews: "Warten auf echte Google-Rezensionen...",
+    instagramTitle: "Instagram",
+    viewInstagram: "Instagram ansehen",
+    loadingInstagram: "Instagram-Feed wird geladen...",
+    restaurantInterior: "Innenraum des Restaurants",
+    restaurantSpace: "Restaurantbereich"
+  }
+};
+const ui = _t[locale as keyof typeof _t] || _t.es;
+---
+
+<MainLayout title={pageTitle} description={homepage?.heroSubtitle || undefined} noPaddingTop={true}>
+
+  {/* SECTION 1: HERO */}
+  <section class="relative h-screen w-full overflow-hidden group">
+    <div
+      class="absolute inset-0 fixed-bg"
+      style={`background-image: url('${typeof homepage?.heroImage === 'object' && homepage?.heroImage?.url ? getOptimizedImageUrl(homepage.heroImage.url) : 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80'}');`}
+    >
+    </div>
+    <div class="absolute inset-0 hero-content-gradient"></div>
+
+    <Container class="relative h-full flex flex-col justify-end items-start pb-12 w-full animate-fade-up">
+      <div class="flex flex-col gap-6 max-w-2xl">
+        <h1 class="text-white font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-tight drop-shadow-2xl">
+          {homepage?.heroTitle || ui.heroTitle}
+        </h1>
+        <p class="text-white/80 text-base sm:text-lg md:text-xl font-light tracking-wide max-w-md border-l-2 border-primary pl-4 sm:pl-6">
+          {homepage?.heroSubtitle || ui.heroSubtitle}
+        </p>
+        <div class="mt-4 flex items-center gap-8">
+          <Button href={`/${locale}/reservas`} variant="primary" size="lg" class="group" trackEvent="reservation_click" trackCategory="hero">
+            {ui.bookTable}
+            <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">arrow_right_alt</span>
+          </Button>
+        </div>
+      </div>
+    </Container>
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
+      <div class="w-px h-12 bg-gradient-to-b from-white to-transparent"></div>
+    </div>
+  </section>
+
+  {/* SECTION 2: BIENVENIDO A WARYNESSY */}
+  <Section id="story" background="dark" class="pt-12 md:pt-16">
+    <Container class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+      <div class="flex flex-col gap-8 order-2 lg:order-1 animate-fade-up">
+        <h2 class="text-white font-serif text-4xl md:text-6xl font-bold leading-tight">
+          {homepage?.welcomeTitle || ui.storyTitle}
+        </h2>
+        <div class="w-20 h-1.5 bg-primary"></div>
+        <div class="text-white/70 text-xl leading-relaxed font-light">
+          {homepage?.welcomeText?.root?.children && Array.isArray(homepage.welcomeText.root.children)
+            ? homepage.welcomeText.root.children.map((block: any, i: number) => (
+                <p class={i > 0 ? "mt-4" : ""}>
+                  {block.children?.map((child: any) => child.text).join('')}
+                </p>
+              ))
+            : ui.storyText
+          }
+        </div>
+        {/* 
+        <div class="mt-4">
+          <Button href={`/${locale}/historia`} variant="outline" class="border-white/20 text-white hover:bg-white hover:text-black transition-all group">
+            Conoce nuestra historia
+            <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">arrow_right_alt</span>
+          </Button>
+        </div>
+        */}
+      </div>
+      <div class="grid grid-cols-2 gap-6 order-1 lg:order-2 animate-stagger-container">
+        {homepage?.galeriaInicio?.slice(0, 2).map((img: any, i: number) => (
+          <ResponsiveImage
+            src={typeof img.imagen === 'object' ? img.imagen?.url : ''}
+            alt={ui.restaurantInterior}
+            class={`rounded-2xl shadow-2xl ${i === 1 ? 'mt-12' : ''} animate-stagger-item`}
+            aspectRatio="3/4"
+          />
+        ))}
+         {(!homepage?.galeriaInicio || homepage.galeriaInicio.length === 0) && (
+             <>
+               <div class="aspect-[3/4] rounded-2xl bg-zinc-300 dark:bg-zinc-800 shadow-xl animate-stagger-item"></div>
+               <div class="aspect-[3/4] rounded-2xl bg-zinc-300 dark:bg-zinc-800 shadow-xl mt-12 animate-stagger-item"></div>
+             </>
+        )}
+      </div>
+    </Container>
+  </Section>
+
+  {/* SECTION 3: HORARIOS */}
+  <Section background="none" class="bg-[#2B2621] py-20">
+    <Container class="max-w-2xl">
+      <div class="flex flex-col items-center animate-fade-up">
+        <div class="flex items-center gap-3 mb-8">
+          <span class="material-symbols-outlined text-primary text-3xl">schedule</span>
+          <h2 class="text-white text-4xl md:text-5xl font-serif font-bold tracking-tight">{ui.schedule}</h2>
+        </div>
+        
+        <div class="w-full bg-matte-black/50 backdrop-blur-md rounded-2xl p-6 md:p-10 shadow-2xl border border-white/5 animate-stagger-container">
+          {siteSettings?.openingHours?.map((schedule: any) => (
+            <div class="flex justify-between items-center py-4 border-b border-white/5 last:border-0 animate-stagger-item">
+              <p class="text-[#FDFDFD] font-bold text-base md:text-lg">{schedule.days}</p>
+              <p class="text-[#D1C2B4] text-sm md:text-base font-medium text-right leading-relaxed">
+                {schedule.closed ?
+                  <span class="text-white/30 uppercase tracking-widest text-xs font-black">{ui.closed}</span> :
+                  <Fragment set:html={(schedule.hours || '').replace(' / ', '<br/>')} />
+                }
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div class="mt-12">
+          <Button href={`/${locale}/reservas`} variant="primary" size="lg" class="group" trackEvent="reservation_click" trackCategory="horarios">
+            {ui.goToReservations}
+            <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">calendar_month</span>
+          </Button>
+        </div>
+      </div>
+    </Container>
+  </Section>
+
+  {/* SECTION 4: REGALA GASTRONOMÍA */}
+  <section class="w-full relative py-24 overflow-hidden group bg-accent-red">
+    {/* Fondo con imágenes */}
+    <div class="absolute inset-0 z-0 grid grid-cols-2 md:grid-cols-4 grayscale-[30%] opacity-80 group-hover:grayscale-0 transition-all duration-[2s]">
+      {homepage?.galeriaRegalo && homepage.galeriaRegalo.length > 0 ? (
+        homepage.galeriaRegalo.map((item: any) => {
+          const imgUrl = typeof item.imagen === 'object' ? item.imagen?.url : '';
+          return (
+            <div class="relative h-full w-full">
+              {imgUrl ? (
+                <img
+                  src={getOptimizedImageUrl(imgUrl)}
+                  alt="Imagen regalo"
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div class="bg-black/20 h-full w-full"></div>
+              )}
+            </div>
+          );
+        })
+      ) : (
+        <>
+          <div class="bg-black/20 h-full w-full"></div>
+          <div class="bg-black/10 h-full w-full"></div>
+          <div class="bg-black/20 h-full w-full"></div>
+          <div class="bg-black/10 h-full w-full"></div>
+        </>
+      )}
+    </div>
+    
+    {/* Overlay Rojo - Más transparente para que se vean mejor las imágenes */}
+    <div class="absolute inset-0 z-[1] bg-accent-red/40 transition-colors duration-700 group-hover:bg-accent-red/30"></div>
+    {/* Degradado lateral más fuerte para mejorar la legibilidad del texto */}
+    <div class="absolute inset-0 z-[1] bg-gradient-to-r from-black/80 via-accent-red/40 to-black/80 md:from-black/90 md:via-transparent md:to-accent-red/20 opacity-90"></div>
+
+    <Container class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+      <div class="text-center md:text-left max-w-2xl">
+        <h2 class="text-white font-serif text-4xl md:text-6xl font-bold mb-4 [text-shadow:_0_4px_12px_rgb(0_0_0_/_80%)]">
+          {homepage?.ctaTitle || ui.giftTitle}
+        </h2>
+        <p class="text-white text-xl font-medium [text-shadow:_0_2px_8px_rgb(0_0_0_/_80%)] bg-black/10 md:bg-transparent p-4 md:p-0 rounded-xl backdrop-blur-[2px] md:backdrop-blur-none">
+          {homepage?.ctaText || ui.giftDesc}
+        </p>
+      </div>
+      <Button href={`/${locale}/experiencias`} variant="white" size="lg" class="text-accent-red hover:scale-105 transition-transform shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] group" trackEvent="gift_card_click" trackCategory="promo">
+        {homepage?.ctaButtonText || ui.buyGiftCard}
+        <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">arrow_right_alt</span>
+      </Button>
+    </Container>
+    
+    {/* Icono decorativo sutil */}
+    <div class="absolute -bottom-10 -right-10 opacity-5 scale-150 pointer-events-none z-[1]">
+      <span class="material-symbols-outlined text-[400px] text-white">card_giftcard</span>
+    </div>
+  </section>
+
+  {/* SECTION 5: ATMÓSFERAS / ESPACIOS */}
+  <Section id="espacios" background="dark" class="overflow-hidden">
+    <Container>
+      <div class="flex flex-col md:flex-row justify-between items-end mb-16 animate-fade-up gap-8">
+        <div class="max-w-2xl">
+          <h2 class="text-4xl md:text-6xl font-serif font-bold text-white leading-tight">{ui.spacesTitle}</h2>
+          <p class="text-white/70 text-xl font-light mt-4">{ui.spacesDesc}</p>
+        </div>
+        <Button href={`/${locale}/espacios`} variant="outline" class="border-white/20 text-white hover:bg-white hover:text-black hover:border-white transition-all" trackEvent="view_spaces" trackCategory="navigation">
+          {ui.discoverSpaces}
+        </Button>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 auto-rows-[200px] md:auto-rows-[250px] gap-4 md:gap-6 animate-stagger-container">
+        {homepage?.galeriaInicio?.slice(2, 7).map((img: any, i: number) => {
+          // Bento Grid para las imágenes de espacios (hasta la 07)
+          let gridClasses = "col-span-1 row-span-1";
+          
+          if (i === 0) {
+            gridClasses = "col-span-2 row-span-2"; // Imagen destacada (2x2)
+          }
+
+          return (
+            <div class={`animate-stagger-item ${gridClasses} overflow-hidden rounded-2xl group relative shadow-xl`}>
+              <ResponsiveImage
+                src={typeof img.imagen === 'object' ? img.imagen?.url : ''}
+                alt={typeof img.imagen === 'object' && img.imagen?.alt ? img.imagen.alt : ui.restaurantSpace}
+                class="h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
+              />
+              <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700"></div>
+            </div>
+          );
+        })}
+      </div>
+    </Container>
+  </Section>
+
+  {/* SECTION 6: OPINIONES */}
+  <Section background="none" class="bg-[#2B2621] text-white !pb-12 overflow-hidden">
+    <Container>
+      <div class="flex flex-col items-center text-center animate-fade-up">
+        <h2 class="text-4xl md:text-6xl font-serif font-bold mb-6 text-white leading-tight">{ui.reviewsTitle}</h2>
+        <div class="flex items-center gap-4 mb-12">
+          <div class="flex text-yellow-500 gap-1">
+            {[1, 2, 3, 4, 5].map(() => (
+              <span class="material-symbols-outlined fill-[1]">star</span>
+            ))}
+          </div>
+          <span class="text-xl font-bold text-white">4.8</span>
+          <span class="text-white/20">|</span>
+          <p class="text-white/60 uppercase tracking-widest text-sm">{ui.reviewsSource}</p>
+        </div>
+      </div>
+
+      <div class="relative px-4 md:px-12">
+        <div class="swiper reviews-swiper">
+          <div class="swiper-wrapper">
+            {opiniones?.map((review: any) => (
+              <div class="swiper-slide h-auto">
+                <div class="bg-white/5 backdrop-blur-sm p-6 rounded-2xl shadow-sm border border-white/10 flex flex-col gap-3 h-full transition-all hover:bg-white/10">
+                  <div class="flex items-center gap-3">
+                    {review.profile_photo_url ? (
+                      <img 
+                        src={review.profile_photo_url} 
+                        alt={review.author_name} 
+                        class="w-10 h-10 rounded-full object-cover" 
+                        referrerpolicy="no-referrer"
+                      />
+                    ) : (
+                      <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                        {review.author_name.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <h4 class="font-bold text-white text-sm line-clamp-1">{review.author_name}</h4>
+                      <div class="flex text-yellow-500 text-[10px]">
+                        {Array.from({ length: Math.floor(review.rating) }).map(() => (
+                          <span class="material-symbols-outlined text-[10px] fill-[1]">star</span>
+                        ))}
+                        {review.rating % 1 !== 0 && (
+                          <span class="material-symbols-outlined text-[10px]">star_half</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                   <p class="text-white/70 italic text-sm line-clamp-4">"{review.text}"</p>
+                  <p class="text-[10px] text-white/40 uppercase tracking-widest pt-3 border-t border-white/10 mt-auto font-medium">
+                    {review.relative_time_description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Navegación - Eliminadas flechas por solicitud de usuario */}
+        </div>
+        
+        {(!opiniones || opiniones.length === 0) && (
+          <div class="text-center py-12 text-gray-400 italic">
+            {ui.loadingReviews}
+          </div>
+        )}
+      </div>
+    </Container>
+  </Section>
+
+  <script>
+    import Swiper from 'swiper';
+    import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+    import 'swiper/css';
+    import 'swiper/css/navigation';
+    import 'swiper/css/pagination';
+
+    document.addEventListener('astro:page-load', () => {
+      new Swiper('.reviews-swiper', {
+        modules: [Navigation, Pagination, Autoplay],
+        slidesPerView: 1,
+        spaceBetween: 20,
+        loop: true,
+        autoplay: {
+          delay: 5000,
+          disableOnInteraction: false,
+        },
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        breakpoints: {
+          640: {
+            slidesPerView: 2,
+          },
+          1024: {
+            slidesPerView: 3,
+          },
+          1280: {
+            slidesPerView: 4,
+          },
+        },
+      });
+    });
+  </script>
+
+  <style is:global>
+    .reviews-swiper {
+      padding: 10px 5px !important;
+    }
+    .swiper-button-next, .swiper-button-prev {
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .dark .swiper-button-next, .dark .swiper-button-prev {
+      background: #1F1F1F;
+      border-color: rgba(255,255,255,0.05);
+    }
+  </style>
+
+  {/* SECTION 7: INSTAGRAM */}
+  <Section background="none" class="bg-[#2B2621] text-white !pt-12">
+    <Container>
+      <div class="flex flex-col items-center text-center mb-12 animate-fade-up">
+        <h2 class="text-4xl md:text-6xl font-serif font-bold mb-4 text-white leading-tight">{ui.instagramTitle}</h2>
+
+        <Button 
+          href={siteSettings?.socialMedia?.instagram || "https://www.instagram.com/warynessy/"} 
+          target="_blank" 
+          variant="outline" 
+          class="border-white text-white hover:bg-white hover:text-black"
+          trackEvent="social_click"
+          trackCategory="instagram_section"
+        >
+          {ui.viewInstagram}
+        </Button>
+      </div>
+      <div class="instagram-content">
+        {instagramConfig?.method === 'widget' && instagramConfig?.embedCode ? (
+          <div class="instagram-widget-container max-w-5xl mx-auto" set:html={instagramConfig.embedCode} />
+        ) : (
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 animate-stagger-container">
+            {instagramPosts?.map((post) => (
+              <a 
+                href={post.permalink} 
+                target="_blank" 
+                class="aspect-square bg-white/5 hover:opacity-80 transition-opacity cursor-pointer overflow-hidden rounded-md animate-stagger-item"
+              >
+                <ResponsiveImage
+                  src={post.media_url}
+                  alt={post.caption || ui.loadingInstagram}
+                  class="h-full w-full"
+                  aspectRatio="1/1"
+                />
+              </a>
+            ))}
+            {(!instagramPosts || instagramPosts.length === 0) && (
+              <div class="col-span-full py-12 text-center text-white/30 italic">
+                {ui.loadingInstagram}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Container>
+  </Section>
+</MainLayout>

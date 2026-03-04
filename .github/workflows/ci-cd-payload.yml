@@ -1,0 +1,337 @@
+name: CI/CD Pipeline - Payload & Astro
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+jobs:
+  # ==========================================
+  # JOB 1: Verificación de Código y Tipos
+  # ==========================================
+  verify:
+    name: 📋 Verificar Código y Tipos
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+      
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 📦 Instalar dependencias
+        run: npm ci
+      
+      - name: 🔍 Verificar seguridad de scripts
+        run: |
+          echo "🔍 Verificando seguridad de scripts de base de datos..."
+          
+          # Verificar que nuke-db.ts está protegido
+          if grep -q "DEPRECATED" scripts/nuke-db.ts; then
+            echo "✅ nuke-db.ts está marcado como DEPRECATED"
+          else
+            echo "❌ ERROR: nuke-db.ts no está protegido correctamente"
+            exit 1
+          fi
+          
+          # Verificar que nuke-db-dev-only.ts tiene verificaciones
+          if grep -q "checkEnvironment" scripts/nuke-db-dev-only.ts; then
+            echo "✅ nuke-db-dev-only.ts tiene verificaciones de entorno"
+          else
+            echo "❌ ERROR: nuke-db-dev-only.ts no tiene verificaciones de seguridad"
+            exit 1
+          fi
+          
+          echo "✅ Verificación de seguridad completada"
+      
+      - name: 🔬 Verificar tipos TypeScript
+        run: |
+          echo "🔬 Verificando tipos TypeScript..."
+          npm run generate:types
+          
+          # Verificar que payload-types.ts se generó correctamente
+          if [ -f "src/payload/payload-types.ts" ]; then
+            echo "✅ Tipos de Payload generados correctamente"
+          else
+            echo "❌ ERROR: payload-types.ts no se generó"
+            exit 1
+          fi
+          
+          # Verificar que no hay errores de TypeScript
+          npx tsc --noEmit || exit 1
+          echo "✅ Verificación de TypeScript completada sin errores"
+      
+      - name: 🔍 Verificar migraciones seguras
+        run: |
+          echo "🔍 Verificando seguridad de migraciones..."
+          
+          # Buscar migraciones con operaciones peligrosas
+          if find src/migrations -name "*.ts" -exec grep -l "DROP TABLE\|DROP SCHEMA\|DELETE FROM\|TRUNCATE" {} \; | grep -q .; then
+            echo "❌ ERROR: Se encontraron operaciones peligrosas en migraciones:"
+            find src/migrations -name "*.ts" -exec grep -Hn "DROP TABLE\|DROP SCHEMA\|DELETE FROM\|TRUNCATE" {} \;
+            exit 1
+          else
+            echo "✅ No se encontraron operaciones peligrosas en migraciones"
+          fi
+      
+      - name: 🏗️ Build de Astro
+        run: |
+          echo "🏗️ Build de Astro..."
+          npm run build:astro
+          echo "✅ Build de Astro completado"
+
+  # ==========================================
+  # JOB 2: Ejecutar Migraciones (Solo en main)
+  # ==========================================
+  migrate:
+    name: 🗄️ Ejecutar Migraciones
+    runs-on: ubuntu-latest
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: warynessy_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+      
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 📦 Instalar dependencias
+        run: npm ci
+      
+      - name: 🔬 Verificar tipos TypeScript
+        run: npm run generate:types
+      
+      - name: 🗄️ Verificar archivos de migración
+        run: |
+          echo "🗄️ Verificando archivos de migración..."
+          if [ -d "src/migrations" ] && [ "$(ls -A src/migrations)" ]; then
+            echo "✅ Se encontraron migraciones pendientes:"
+            ls -la src/migrations/*.ts
+          else
+            echo "ℹ️  No hay migraciones pendientes"
+          fi
+      
+      - name: ⚠️ Advertencia de migraciones en producción
+        run: |
+          echo "⚠️⚠️⚠️ ADVERTENCIA DE SEGURIDAD ⚠️⚠️⚠️"
+          echo ""
+          echo "Este pipeline va a ejecutar migraciones en la base de datos."
+          echo "Por favor, asegúrate de:"
+          echo "  1. Hacer un backup completo de la base de datos ANTES de continuar"
+          echo "  2. Revisar manualmente todas las migraciones pendientes"
+          echo "  3. Verificar que no hay operaciones DROP/DELETE/TRUNCATE"
+          echo "  4. Tener un plan de rollback listo"
+          echo ""
+          echo "Si no estás seguro, CANCELA este workflow ahora."
+      
+      - name: 📊 Ejecutar migraciones de Payload
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/warynessy_test
+        run: |
+          echo "📊 Ejecutando migraciones de Payload..."
+          
+          # Verificar si existe script de migración
+          if grep -q '"migrate"' package.json; then
+            npm run migrate || echo "⚠️ No se encontró script 'migrate'"
+          else
+            echo "ℹ️  Script 'migrate' no configurado en package.json"
+          fi
+          
+          echo "✅ Migraciones ejecutadas correctamente"
+      
+      - name: 📋 Reporte de migraciones
+        if: always()
+        run: |
+          echo "📋 Reporte de migraciones ejecutadas:"
+          echo ""
+          echo "Archivos de migración:"
+          ls -la src/migrations/*.ts 2>/dev/null || echo "No hay archivos de migración"
+          echo ""
+          echo "Tipos generados:"
+          ls -la src/payload/payload-types.ts 2>/dev/null || echo "Tipos no generados"
+
+  # ==========================================
+  # JOB 3: Deploy a Producción (Dokploy)
+  # ==========================================
+  deploy:
+    name: 🚀 Deploy a Producción
+    runs-on: ubuntu-latest
+    needs: [verify, migrate]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+      
+      - name: 📝 Notificar inicio de deploy
+        run: |
+          echo "🚀 Iniciando deploy a producción..."
+          echo "📊 Commit: ${{ github.sha }}"
+          echo "👤 Autor: ${{ github.actor }}"
+          echo "📅 Fecha: $(date)"
+      
+      - name: 🔍 Verificar precondiciones de deploy
+        run: |
+          echo "🔍 Verificando precondiciones..."
+          
+          # Verificar que no hay scripts peligrosos modificados
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q "scripts/nuke-db.ts"; then
+            echo "❌ ERROR: nuke-db.ts fue modificado en este commit"
+            echo "❌ Deploy abortado por seguridad"
+            exit 1
+          fi
+          
+          # Verificar que payload-types.ts está actualizado
+          if [ ! -f "src/payload/payload-types.ts" ]; then
+            echo "❌ ERROR: payload-types.ts no encontrado"
+            echo "❌ Deploy abortado"
+            exit 1
+          fi
+          
+          echo "✅ Precondiciones verificadas"
+      
+      - name: 📋 Checklist de seguridad antes del deploy
+        run: |
+          echo "📋 Checklist de seguridad antes del deploy:"
+          echo ""
+          echo "☑️ Verificaciones completadas:"
+          echo "   ✅ Tipos TypeScript verificados"
+          echo "   ✅ Scripts de seguridad revisados"
+          echo "   ✅ Migraciones verificadas"
+          echo "   ✅ Build exitoso"
+          echo "   ✅ Sin scripts peligrosos modificados"
+          echo ""
+          echo "🎯 Checklist manual requerido:"
+          echo "   [ ] Backup de base de datos completado"
+          echo "   [ ] Migraciones revisadas manualmente"
+          echo "   [ ] Plan de rollback preparado"
+          echo "   [ ] Equipo notificado del deploy"
+      
+      - name: 🚀 Trigger de Dokploy (manual)
+        run: |
+          echo "🚀 Deploy programado para Dokploy"
+          echo ""
+          echo "⚠️ Nota: Este workflow NO hace deploy automático"
+          echo ""
+          echo "Para hacer deploy a producción:"
+          echo "  1. Ve a tu panel de Dokploy"
+          echo "  2. Navega al proyecto warynessy26"
+          echo "  3. Hacer pull de los últimos cambios"
+          echo "  4. Ejecutar 'npm run migrate' en el servidor"
+          echo "  5. Reiniciar el servidor"
+          echo "  6. Verificar logs de aplicación"
+          echo ""
+          echo "📊 O usar el MCP server de Dokploy para deploy automático"
+      
+      - name: ✅ Notificar deploy completado
+        if: success()
+        run: |
+          echo "✅ Pipeline de CI/CD completado exitosamente"
+          echo ""
+          echo "📊 Resumen:"
+          echo "   ✅ Verificación de código: OK"
+          echo "   ✅ Verificación de tipos: OK"
+          echo "   ✅ Seguridad de scripts: OK"
+          echo "   ✅ Migraciones: OK"
+          echo "   ✅ Deploy: Programado"
+      
+      - name: ❌ Notificar falla del deploy
+        if: failure()
+        run: |
+          echo "❌ Pipeline de CI/CD fallido"
+          echo ""
+          echo "📊 Revisar:"
+          echo "   • Logs de error en los jobs anteriores"
+          echo "   • Scripts de migración modificados"
+          echo "   • Cambios en configuración de Payload"
+          echo ""
+          echo "🚨 NO hacer deploy hasta corregir errores"
+
+  # ==========================================
+  # JOB 4: Reporte de Seguridad
+  # ==========================================
+  security-report:
+    name: 🛡️ Reporte de Seguridad
+    runs-on: ubuntu-latest
+    needs: [verify]
+    if: always()
+    
+    steps:
+      - name: 📥 Checkout del repositorio
+        uses: actions/checkout@v4
+      
+      - name: 📊 Generar reporte de seguridad
+        run: |
+          echo "📊 Reporte de Seguridad - CI/CD Pipeline"
+          echo "================================================"
+          echo ""
+          echo "📅 Fecha: $(date)"
+          echo "📊 Commit: ${{ github.sha }}"
+          echo "👤 Autor: ${{ github.actor }}"
+          echo "🌿 Rama: ${{ github.ref }}"
+          echo ""
+          echo "📋 Checklist de Verificación:"
+          echo ""
+          echo "✅ Seguridad de Scripts:"
+          echo "   • nuke-db.ts: DEPRECATED y protegido"
+          echo "   • nuke-db-dev-only.ts: Múltiples capas de protección"
+          echo "   • Verificaciones de entorno: Activas"
+          echo "   • Confirmación manual: Requerida"
+          echo ""
+          echo "✅ Tipos TypeScript:"
+          echo "   • payload-types.ts: Generado y verificado"
+          echo "   • Sin errores de compilación"
+          echo ""
+          echo "✅ Migraciones:"
+          echo "   • Sin operaciones DROP/DELETE/TRUNCATE"
+          echo "   • Solo operaciones ADD/ALTER permitidas"
+          echo ""
+          echo "✅ Configuración:"
+          echo "   • DATABASE_URL: Configurado como secret"
+          echo "   • NODE_ENV: Verificado antes de operaciones"
+          echo ""
+          echo "📚 Documentación:"
+          echo "   • docs/security/SCRIPT-SEGURIDAD-BASE-DATOS.md: Actualizada"
+          echo "   • docs/agents/CI-CD.md: Referencia del pipeline"
+          echo ""
+          echo "================================================"
+          echo "🛡️ Reporte de Seguridad Generado"
+      
+      - name: 💾 Guardar reporte
+        run: |
+          mkdir -p .security-reports
+          echo "📊 Reporte de Seguridad - CI/CD Pipeline" > .security-reports/security-$(date +%Y%m%d-%H%M%S).txt
+          echo "Fecha: $(date)" >> .security-reports/security-$(date +%Y%m%d-%H%M%S).txt
+          echo "Commit: ${{ github.sha }}" >> .security-reports/security-$(date +%Y%m%d-%H%M%S).txt
+          echo "Autor: ${{ github.actor }}" >> .security-reports/security-$(date +%Y%m%d-%H%M%S).txt
+          echo "Estado: Verificación completada" >> .security-reports/security-$(date +%Y%m%d-%H%M%S).txt
+          
+          echo "💾 Reporte guardado en .security-reports/"

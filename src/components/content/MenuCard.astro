@@ -5,11 +5,14 @@ import Button from '../ui/Button.astro';
 
 interface Props {
   menu: Menu;
+  locale?: string;
 }
 
 import { getOptimizedImageUrl } from '../../lib/cdn';
+import { getTranslations } from '../../lib/i18n';
 
-const { menu } = Astro.props;
+const { menu, locale = 'es' } = Astro.props;
+const ui = getTranslations(locale).menuCard;
 const imageUrl = getOptimizedImageUrl(typeof menu.imagen === 'object' ? menu.imagen?.url || '' : '');
 
 // Extract plain text from Lexical rich text
@@ -29,9 +32,11 @@ const descriptionText = menu.descripcion_menu || '';
 const descriptionHtml = descriptionText.replace(/\n/g, '<br>');
 
 // Date formatting
+const localeToIntl: Record<string, string> = { es: 'es-ES', ca: 'ca-ES', en: 'en-GB', fr: 'fr-FR', de: 'de-DE' };
+const intlLocale = localeToIntl[locale] || 'es-ES';
 const formatDate = (dateString: string, includeYear: boolean = true) => {
   if (!dateString) return '';
-  return new Date(dateString).toLocaleDateString('es-ES', {
+  return new Date(dateString).toLocaleDateString(intlLocale, {
     day: 'numeric',
     month: 'long',
     ...(includeYear ? { year: 'numeric' } : {})
@@ -39,7 +44,7 @@ const formatDate = (dateString: string, includeYear: boolean = true) => {
 };
 
 const dateRange = menu.fechaInicio && menu.fechaFin
-  ? `Del <strong>${formatDate(menu.fechaInicio, false)}</strong> hasta el <strong>${formatDate(menu.fechaFin)}</strong>`
+  ? `${ui.dateFrom} <strong>${formatDate(menu.fechaInicio, false)}</strong> ${ui.dateUntil} <strong>${formatDate(menu.fechaFin)}</strong>`
   : null;
 
 // Badge Logic
@@ -102,12 +107,12 @@ const badgeText = menu.etiqueta && menu.etiqueta !== "null" ? menu.etiqueta : (m
 
     <div class="mt-4">
       <a 
-        href={`/menus/${menu.slug}`} 
+        href={`/${locale}/menus/${menu.slug}`} 
         class="flex items-center justify-center w-full py-4 bg-primary text-white rounded-2xl text-sm font-black uppercase tracking-[0.2em] transition-all hover:bg-primary/80 active:scale-[0.98] shadow-lg shadow-primary/20"
         data-track="menu_view"
         data-track-category="menu_card"
       >
-        Ver menú
+        {ui.viewMenu}
       </a>
     </div>
   </div>

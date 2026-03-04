@@ -15,9 +15,11 @@ interface Props {
 }
 
 const { title, description, noPaddingTop = false, hideFloatingButton = false, schemaType, schemaData } = Astro.props;
+const { lang } = Astro.params;
+const locale = lang || 'es';
 ---
 
-<BaseLayout title={title} description={description} schemaType={schemaType} schemaData={schemaData}>
+<BaseLayout title={title} description={description} schemaType={schemaType} schemaData={schemaData} locale={locale}>
 	<!-- Skip to Content Link - Accesibilidad -->
 	<a
 		href="#main-content"
@@ -26,13 +28,13 @@ const { title, description, noPaddingTop = false, hideFloatingButton = false, sc
 		Saltar al contenido principal
 	</a>
 
-	<Header />
+	<Header locale={locale} />
 
 	<main id="main-content" class={`flex-grow ${noPaddingTop ? '' : 'pt-20 md:pt-24'}`} tabindex="-1">
 		<slot />
 	</main>
 
-	<Footer hideFloatingButton={hideFloatingButton} />
+	<Footer hideFloatingButton={hideFloatingButton} locale={locale} />
 	<ScrollAnimations />
 	<CookieBanner />
 

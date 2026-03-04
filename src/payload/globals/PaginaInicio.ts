@@ -1,10 +1,77 @@
 import type { GlobalConfig } from 'payload'
+import { callTranslationAgent, translateLexical } from '../utils/translation-utils'
 
 export const PaginaInicio: GlobalConfig = {
   slug: 'pagina-inicio',
   label: 'Página de Inicio',
   access: {
     read: () => true, // Public read access
+  },
+  hooks: {
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        // Solo si venimos de la versión en español
+        if ((req as any).locale !== 'es') {
+          console.log(`[PAGINA-INICIO] Saltando traducción automático (locale: ${(req as any).locale})`);
+          return;
+        }
+
+        console.log(`[PAGINA-INICIO] Iniciando proceso de traducción automática...`);
+
+        const payload = req.payload;
+        const configTraduccion: any = await payload.findGlobal({ slug: 'configuracion-traduccion' as any });
+        const endpoint = configTraduccion?.endpointAgente || 'http://localhost:8000/translate';
+        const model = configTraduccion?.modeloIA;
+
+        const targetLocales = ['ca', 'en', 'fr', 'de'] as const;
+        const fieldsToTranslate = [
+          'heroTitle', 'heroSubtitle', 'welcomeTitle', 'welcomeText',
+          'ctaTitle', 'ctaText', 'ctaButtonText', 'seoTitle', 'seoDescription'
+        ];
+
+        await Promise.all(targetLocales.map(async (locale) => {
+          const translatedData: any = {};
+          let hasTranslations = false;
+
+          await Promise.all(fieldsToTranslate.map(async (field) => {
+            const value = doc[field];
+            if (!value) return;
+            const prevValue = (previousDoc as any)?.[field];
+            const changed = JSON.stringify(value) !== JSON.stringify(prevValue);
+            if (!changed) return;
+            try {
+              // Si es RichText (Lexical)
+              if (typeof value === 'object' && value !== null && value.root) {
+                console.log(`[PAGINA-INICIO] Traduciendo RichText: ${field} al locale ${locale}...`);
+                translatedData[field] = await translateLexical(value, locale, endpoint, model);
+                hasTranslations = true;
+              }
+              // Si es texto plano
+              else if (typeof value === 'string' && value.trim().length > 0) {
+                console.log(`[PAGINA-INICIO] Traduciendo texto: ${field} al locale ${locale}...`);
+                translatedData[field] = await callTranslationAgent(value, locale, endpoint, model);
+                hasTranslations = true;
+              }
+            } catch (e) {
+              console.error(`[PAGINA-INICIO] Error al traducir ${field} a ${locale}:`, e);
+            }
+          }));
+
+          if (hasTranslations) {
+            console.log(`[PAGINA-INICIO] Aplicando traducciones a locale ${locale}...`);
+            try {
+              await payload.updateGlobal({
+                slug: 'pagina-inicio',
+                data: translatedData,
+                locale: locale as any,
+              });
+            } catch (updateErr) {
+              console.error(`[PAGINA-INICIO] Error guardando locale ${locale}:`, updateErr);
+            }
+          }
+        }));
+      }
+    ]
   },
   fields: [
     // Hero Section
@@ -13,6 +80,7 @@ export const PaginaInicio: GlobalConfig = {
       type: 'text',
       label: 'Título Principal (Hero)',
       required: true,
+      localized: true,
       admin: {
         description: 'Título principal de la página de inicio',
       },
@@ -21,6 +89,7 @@ export const PaginaInicio: GlobalConfig = {
       name: 'heroSubtitle',
       type: 'textarea',
       label: 'Subtítulo (Hero)',
+      localized: true,
       admin: {
         description: 'Subtítulo o claim del restaurante',
       },
@@ -38,6 +107,7 @@ export const PaginaInicio: GlobalConfig = {
       name: 'welcomeTitle',
       type: 'text',
       label: 'Título de Bienvenida',
+      localized: true,
       admin: {
         description: 'Título de la sección de bienvenida (Historia)',
       },
@@ -46,6 +116,7 @@ export const PaginaInicio: GlobalConfig = {
       name: 'welcomeText',
       type: 'richText',
       label: 'Texto de Bienvenida / Fundación',
+      localized: true,
       admin: {
         description: 'Historia y filosofía del restaurante',
       },
@@ -74,6 +145,7 @@ export const PaginaInicio: GlobalConfig = {
       name: 'ctaTitle',
       type: 'text',
       label: 'Título del CTA de Reservas',
+      localized: true,
       admin: {
         description: 'Texto del call to action para reservar',
       },
@@ -82,11 +154,13 @@ export const PaginaInicio: GlobalConfig = {
       name: 'ctaText',
       type: 'textarea',
       label: 'Texto del CTA',
+      localized: true,
     },
     {
       name: 'ctaButtonText',
       type: 'text',
       label: 'Texto del Botón CTA',
+      localized: true,
       defaultValue: 'Reservar ahora',
       admin: {
         description: 'Texto del botón de reserva',
@@ -143,6 +217,7 @@ export const PaginaInicio: GlobalConfig = {
       name: 'seoTitle',
       type: 'text',
       label: 'SEO: Título',
+      localized: true,
       maxLength: 60,
       admin: {
         description: 'Título para SEO (meta title)',
@@ -152,6 +227,7 @@ export const PaginaInicio: GlobalConfig = {
       name: 'seoDescription',
       type: 'textarea',
       label: 'SEO: Descripción',
+      localized: true,
       maxLength: 160,
       admin: {
         description: 'Descripción para SEO (meta description)',
@@ -159,3 +235,4 @@ export const PaginaInicio: GlobalConfig = {
     },
   ],
 }
+

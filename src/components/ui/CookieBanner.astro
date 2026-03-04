@@ -1,6 +1,14 @@
 ---
 // Cookie Banner - RGPD Compliant
+import { getTranslations } from '../../lib/i18n';
+
+const { locale: propsLocale } = Astro.props;
+const { lang } = Astro.params;
+const locale = propsLocale || lang || 'es';
+const t = getTranslations(locale).cookieBanner;
+
 ---
+
 
 <div
   id="cookie-banner"
@@ -16,12 +24,11 @@
         <!-- Texto informativo -->
         <div class="flex-1">
           <h3 id="cookie-title" class="text-white font-display text-lg font-semibold mb-2">
-            Utilizamos cookies
+            {t.title}
           </h3>
           <p id="cookie-description" class="text-white/60 text-sm leading-relaxed">
-            Usamos cookies propias y de terceros para mejorar tu experiencia, analizar el tráfico y personalizar el contenido.
-            Puedes aceptar todas, rechazarlas o configurar tus preferencias.
-            <a href="/cookies" class="text-primary hover:underline ml-1">Más información</a>
+            {t.desc}
+            <a href={`/${locale}/cookies`} class="text-primary hover:underline ml-1">{t.moreInfo}</a>
           </p>
         </div>
 
@@ -30,20 +37,22 @@
           <button
             id="cookie-settings-btn"
             class="px-5 py-3 text-sm font-medium text-white/70 hover:text-white border border-white/20 hover:border-white/40 rounded-lg transition-all"
+            data-label-config={t.settings}
+            data-label-hide={t.hide}
           >
-            Configurar
+            {t.settings}
           </button>
           <button
             id="cookie-reject-btn"
             class="px-5 py-3 text-sm font-medium text-white bg-white/10 hover:bg-white/20 rounded-lg transition-all"
           >
-            Rechazar
+            {t.reject}
           </button>
           <button
             id="cookie-accept-btn"
             class="px-6 py-3 text-sm font-bold text-white bg-primary hover:bg-primary/90 rounded-lg transition-all"
           >
-            Aceptar todas
+            {t.acceptAll}
           </button>
         </div>
       </div>
@@ -55,46 +64,46 @@
           <!-- Necesarias (siempre activas) -->
           <div class="bg-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-white font-medium text-sm">Necesarias</span>
-              <span class="text-xs text-primary">Siempre activas</span>
+              <span class="text-white font-medium text-sm">{t.necessary}</span>
+              <span class="text-xs text-primary">{t.alwaysActive}</span>
             </div>
-            <p class="text-white/50 text-xs">Esenciales para el funcionamiento del sitio web.</p>
+            <p class="text-white/50 text-xs">{t.necessaryDesc}</p>
           </div>
 
           <!-- Analíticas -->
           <div class="bg-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-white font-medium text-sm">Analíticas</span>
+              <span class="text-white font-medium text-sm">{t.analytics}</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="cookie-analytics" class="sr-only peer" checked>
                 <div class="w-9 h-5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
-            <p class="text-white/50 text-xs">Nos ayudan a entender cómo usas el sitio.</p>
+            <p class="text-white/50 text-xs">{t.analyticsDesc}</p>
           </div>
 
           <!-- Marketing -->
           <div class="bg-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-white font-medium text-sm">Marketing</span>
+              <span class="text-white font-medium text-sm">{t.marketing}</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="cookie-marketing" class="sr-only peer">
                 <div class="w-9 h-5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
-            <p class="text-white/50 text-xs">Permiten mostrarte publicidad relevante.</p>
+            <p class="text-white/50 text-xs">{t.marketingDesc}</p>
           </div>
 
           <!-- Preferencias -->
           <div class="bg-white/5 rounded-lg p-4">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-white font-medium text-sm">Preferencias</span>
+              <span class="text-white font-medium text-sm">{t.preferences}</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="cookie-preferences" class="sr-only peer" checked>
                 <div class="w-9 h-5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
               </label>
             </div>
-            <p class="text-white/50 text-xs">Recuerdan tus preferencias de navegación.</p>
+            <p class="text-white/50 text-xs">{t.preferencesDesc}</p>
           </div>
         </div>
 
@@ -103,7 +112,7 @@
             id="cookie-save-settings-btn"
             class="px-6 py-3 text-sm font-bold text-white bg-primary hover:bg-primary/90 rounded-lg transition-all"
           >
-            Guardar preferencias
+            {t.saveSettings}
           </button>
         </div>
       </div>
@@ -175,10 +184,13 @@
       });
     });
 
+    const labelConfig = settingsBtn?.getAttribute('data-label-config') || 'Configurar';
+    const labelHide = settingsBtn?.getAttribute('data-label-hide') || 'Ocultar';
+
     // Toggle settings panel
     settingsBtn?.addEventListener('click', () => {
       settingsPanel?.classList.toggle('hidden');
-      settingsBtn.textContent = settingsPanel?.classList.contains('hidden') ? 'Configurar' : 'Ocultar';
+      settingsBtn.textContent = settingsPanel?.classList.contains('hidden') ? labelConfig : labelHide;
     });
 
     // Save custom settings

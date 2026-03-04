@@ -1,0 +1,303 @@
+---
+import MainLayout from '../../../layouts/MainLayout.astro';
+import Section from '../../../components/ui/Section.astro';
+import Container from '../../../components/ui/Container.astro';
+import Button from '../../../components/ui/Button.astro';
+import RichText from '../../../components/ui/RichText.astro';
+import { getMenuBySlug, getSiteSettings, getActiveMenusSlugs } from '../../../lib/payload-local';
+import { getTranslations } from '../../../lib/i18n';
+
+// Dynamic routes for static generation (though we are in SSR, it's good practice
+// for type safety and discovery, but in output: 'server' it's mostly for SSR)
+// Dynamic routes for static generation
+export async function getStaticPaths() {
+  const locales = ['es', 'ca', 'en', 'fr', 'de'];
+  const slugs = await getActiveMenusSlugs();
+  return locales.flatMap(lang => 
+    slugs.map(slug => ({ params: { lang, slug } }))
+  );
+}
+
+// Disable caching to always show fresh content from CMS
+Astro.response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+Astro.response.headers.set('Pragma', 'no-cache');
+Astro.response.headers.set('Expires', '0');
+
+const { lang, slug } = Astro.params;
+const locale = lang || 'es';
+
+const ui = getTranslations(locale).menuSlug;
+
+if (!slug) return Astro.redirect(`/${locale}/menus`);
+
+const menu = await getMenuBySlug(slug, locale);
+if (!menu) return Astro.redirect(`/${locale}/menus`);
+
+const siteSettings = await getSiteSettings(locale);
+
+const pageTitle = `${menu.nombre} | ${siteSettings?.title || "Warynessy"}`;
+const pageDescription = menu.descripcion_menu || undefined;
+
+const PAYLOAD_URL = import.meta.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3000';
+
+// Hero Image
+const rawHeroUrl = typeof menu.imagen === 'object' && menu.imagen?.url ? menu.imagen.url : '';
+const heroImg = (rawHeroUrl.startsWith('/') && !rawHeroUrl.startsWith('http'))
+  ? `${PAYLOAD_URL}${rawHeroUrl}`
+  : rawHeroUrl || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&q=80';
+
+// PDF URL
+const rawPdfUrl = typeof menu.pdf === 'object' && menu.pdf?.url ? menu.pdf.url : '';
+const pdfUrl = (rawPdfUrl.startsWith('/') && !rawPdfUrl.startsWith('http'))
+  ? `${PAYLOAD_URL}${rawPdfUrl}`
+  : rawPdfUrl;
+
+// Reservas link
+const reservasLink = `/${locale}/reservas`;
+
+// Format dates
+const localeToIntl: Record<string, string> = { es: 'es-ES', ca: 'ca-ES', en: 'en-GB', fr: 'fr-FR', de: 'de-DE' };
+const intlLocale = localeToIntl[locale] || 'es-ES';
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString(intlLocale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+};
+
+const daysMap: Record<string, string> = {
+  'lunes': 'Lun',
+  'martes': 'Mar',
+  'miercoles': 'Mie',
+  'jueves': 'Jue',
+  'viernes': 'Vie',
+  'sabado': 'Sab',
+  'domingo': 'Dom'
+};
+---
+
+<MainLayout title={pageTitle} description={pageDescription}>
+  {/* Hero Section */}
+  <section class="relative h-[65vh] md:h-[75vh] w-full overflow-hidden">
+    <div 
+      class="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] ease-linear-out hover:scale-110"
+      style={`background-image: url('${heroImg}');`}
+    ></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-matte-black via-matte-black/60 to-transparent"></div>
+    
+    <Container class="relative h-full flex flex-col justify-end pb-10 md:pb-16 animate-fade-up">
+      <div class="max-w-4xl">
+        {menu.etiqueta && (
+          <span class="inline-block px-4 py-1.5 bg-primary text-white text-[10px] md:text-xs font-black uppercase tracking-widest rounded-md mb-6 shadow-2xl shadow-primary/40 border border-white/10">
+            {menu.etiqueta}
+          </span>
+        )}
+        <h1 class="text-5xl md:text-8xl font-display font-black text-white mb-6 leading-[1.1] tracking-tight">
+          {menu.nombre}
+        </h1>
+        
+        <div class="flex flex-wrap items-center gap-6 md:gap-12 mb-8">
+           {menu.precio && Number(menu.precio) > 0 && (
+             <div class="flex items-baseline gap-2">
+               <span class="text-4xl md:text-5xl font-black text-primary font-display">{menu.precio} €</span>
+               <span class="text-xs md:text-sm text-white/40 uppercase tracking-widest font-bold">{ui.perPerson}</span>
+             </div>
+           )}
+           
+           {menu.horario && (
+             <div class="bg-white/5 backdrop-blur-md px-5 py-2.5 rounded-xl border border-white/10 flex items-center gap-3">
+               <span class="material-symbols-outlined text-primary text-xl">schedule</span>
+               <div>
+                 <span class="text-white/40 text-[10px] uppercase tracking-widest font-black block leading-none mb-1">{ui.service}</span>
+                 <span class="text-white font-bold capitalize text-sm">{menu.horario === 'ambos' ? ui.lunchDinner : menu.horario}</span>
+               </div>
+             </div>
+           )}
+        </div>
+
+        {/* Disponibilidad Móvil (solo visible en pantallas pequeñas) */}
+        <div class="lg:hidden flex flex-col gap-4 mt-4 animate-fade-up animate-delay-200">
+          {menu.fechasDias && (
+            <div class="bg-white/5 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/5 flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary/60 text-lg">event_available</span>
+              <div>
+                <span class="text-white/30 text-[9px] uppercase tracking-widest font-black block leading-none mb-0.5">{ui.availability}</span>
+                <span class="text-white/80 font-bold text-xs">{menu.fechasDias}</span>
+              </div>
+            </div>
+          )}
+          
+          {menu.descripcion_menu && (
+            <div class="bg-white/5 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/5 flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary/60 text-lg">info</span>
+              <div>
+                <span class="text-white/30 text-[9px] uppercase tracking-widest font-black block leading-none mb-0.5">{ui.info}</span>
+                <span class="text-white/80 font-bold text-xs">{menu.descripcion_menu}</span>
+              </div>
+            </div>
+          )}
+
+          {menu.fechaInicio && menu.fechaFin && (
+            <div class="bg-white/5 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-white/5 flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary/60 text-lg">calendar_month</span>
+              <div>
+                <span class="text-white/30 text-[9px] uppercase tracking-widest font-black block leading-none mb-0.5">{ui.validity}</span>
+                <span class="text-white/80 font-bold text-[10px]">
+                  {formatDate(menu.fechaInicio)} - {formatDate(menu.fechaFin)}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <Section background="dark" class="pt-12 md:pt-16">
+    <Container>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start">
+        
+        {/* Columna Principal: Contenido del Menú */}
+        <div class="lg:col-span-8 animate-fade-up">
+          {menu.descripcion_menu && (
+            <div class="mb-16 relative hidden lg:block">
+              <span class="text-primary/20 text-8xl font-serif absolute -top-10 -left-6 select-none italic">“</span>
+              <p class="text-2xl md:text-3xl text-white/90 font-serif italic leading-relaxed pl-4 relative z-10 whitespace-pre-line">
+                {menu.descripcion_menu}
+              </p>
+            </div>
+          )}
+
+          <div class="w-20 h-1 bg-primary mb-12 hidden lg:block"></div>
+
+          <RichText content={menu.descripcion} class="mb-16" />
+
+
+        </div>
+
+        {/* Barra Lateral: Información & Metadata */}
+        <aside class="lg:col-span-4 lg:sticky lg:top-32 h-fit hidden lg:block">
+          <div class="bg-surface-dark border border-white/5 rounded-[2.5rem] p-10 shadow-2xl space-y-12">
+            
+            {/* Disponibilidad */}
+            <div class="space-y-8">
+              <h4 class="text-primary font-black uppercase tracking-widest text-[11px] flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                {ui.availability}
+              </h4>
+              <ul class="space-y-8">
+                {menu.fechasDias && (
+                  <li class="flex gap-5">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-white/40">
+                      <span class="material-symbols-outlined text-xl">event_available</span>
+                    </div>
+                    <div>
+                      <span class="text-white font-bold block mb-1">{ui.info}</span>
+                      <span class="text-white/50 text-sm leading-relaxed">{menu.fechasDias}</span>
+                    </div>
+                  </li>
+                )}
+                {menu.fechaInicio && menu.fechaFin && (
+                  <li class="flex gap-5">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-white/5 flex items-center justify-center text-white/40">
+                      <span class="material-symbols-outlined text-xl">calendar_month</span>
+                    </div>
+                    <div>
+                      <span class="text-white font-bold block mb-1 text-base">{ui.menuValidity}</span>
+                      <span class="text-white/50 text-sm leading-relaxed">
+                        {ui.dateFrom} {formatDate(menu.fechaInicio)} <br/> {ui.dateTo} {formatDate(menu.fechaFin)}
+                      </span>
+                    </div>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Selector de Días de la Semana */}
+            {menu.diasSemana && menu.diasSemana.length > 0 && (
+              <div class="space-y-6 pt-4">
+                <h4 class="text-white/50 font-black uppercase tracking-widest text-[11px]">
+                  {ui.serviceDays}
+                </h4>
+                <div class="flex flex-wrap gap-2.5">
+                  {['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'].map((dia) => {
+                    const isAvailable = menu.diasSemana?.includes(dia as any);
+                    return (
+                      <span class:list={[
+                        "px-3.5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest border transition-all duration-300",
+                        isAvailable 
+                          ? "bg-primary/10 border-primary/30 text-white/90 shadow-sm" 
+                          : "bg-transparent border-white/5 text-white/10 opacity-40"
+                      ]}>
+                        {daysMap[dia]}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Botones de Acción Desktop */}
+            <div class="pt-8 border-t border-white/5 space-y-4">
+               <Button href={reservasLink} variant="primary" size="lg" class="w-full py-5 rounded-2xl group">
+                  <span class="flex items-center justify-center gap-3 font-bold uppercase tracking-widest text-xs">
+                    <span class="material-symbols-outlined text-lg">calendar_month</span>
+                    {ui.bookTable}
+                  </span>
+               </Button>
+               {pdfUrl && (
+                 <Button href={pdfUrl} variant="outline" size="lg" class="w-full py-5 rounded-2xl" target="_blank">
+                    <span class="flex items-center justify-center gap-3 font-bold uppercase tracking-widest text-xs">
+                       <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                       {ui.downloadMenu}
+                    </span>
+                 </Button>
+               )}
+            </div>
+
+            {/* Letra Pequeña */}
+            <p class="text-[9px] text-white/20 leading-relaxed uppercase tracking-[0.1em] font-medium text-center italic">
+              {ui.disclaimer}
+            </p>
+          </div>
+        </aside>
+
+      </div>
+    </Container>
+  </Section>
+
+  {/* Footer decorativo / Otros Menús */}
+  <Section background="dark" class="border-t border-white/5 overflow-hidden !py-8">
+     <Container>
+        <div class="flex flex-col items-center gap-6 text-center">
+           {/* 1. Botón Volver (Ahora arriba) */}
+           <Button href={`/${locale}/menus`} variant="white" size="lg" class="px-12 rounded-2xl hover:bg-primary hover:text-white transition-colors w-full sm:w-auto">
+              {ui.backToMenus}
+           </Button>
+
+           {/* 2. Textos */}
+           <div class="space-y-4">
+              <h2 class="text-3xl md:text-5xl font-display font-black text-white italic">{ui.discoverMore} <span class="text-primary not-italic">{ui.discoverMoreHighlight}</span></h2>
+              <p class="text-white/40 text-lg">{ui.discoverMoreSub}</p>
+           </div>
+           
+           {/* 3. Botón Reserva (Solo móvil/tablet, al final) */}
+           <Button href={reservasLink} variant="primary" size="lg" class="w-full sm:w-auto px-12 rounded-2xl group shadow-xl shadow-primary/20 lg:hidden">
+              <span class="flex items-center justify-center gap-3 font-black uppercase tracking-widest text-sm">
+                <span class="material-symbols-outlined text-xl">calendar_month</span>
+                {ui.bookTable}
+              </span>
+           </Button>
+        </div>
+     </Container>
+  </Section>
+</MainLayout>
+
+<style>
+  /* Animación suave para el hero */
+  section:hover div[style*="background-image"] {
+    transform: scale(1.05);
+  }
+</style>

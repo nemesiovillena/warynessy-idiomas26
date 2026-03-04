@@ -4,8 +4,9 @@
   "version": "1.0.2",
   "scripts": {
     "dev": "astro dev",
+    "dev:all": "concurrently -n \"payload,astro\" -c \"blue,green\" \"next dev -p 3000 --turbopack\" \"astro dev\"",
     "dev:payload": "tsx server.ts",
-    "dev:admin": "next dev -p 3000",
+    "dev:admin": "next dev -p 3000 --turbopack",
     "build": "astro build && next build && npm run build:server",
     "build:astro": "astro build",
     "build:payload": "next build",
@@ -14,7 +15,10 @@
     "preview": "astro preview",
     "astro": "astro",
     "payload": "payload",
-    "generate:types": "payload generate:types"
+    "generate:types": "payload generate:types",
+    "migrate": "payload migrate",
+    "migrate:create": "payload migrate:create",
+    "migrate:rollback": "payload migrate:rollback"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.2",
@@ -51,6 +55,7 @@
   "devDependencies": {
     "@types/node": "^25.0.8",
     "@types/react": "^19.2.8",
+    "concurrently": "^9.2.1",
     "esbuild": "^0.25.0",
     "typescript": "^5.9.3"
   },

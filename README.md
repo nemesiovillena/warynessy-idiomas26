@@ -1,287 +1,602 @@
-# 🍽️ Warynessy 2026 - Sitio Web del Restaurante
+# Claude Code Boilerplate
 
-Sitio web oficial del Restaurante Warynessy, construido con tecnologías modernas para ofrecer una experiencia de usuario excepcional y facilitar la gestión de contenido.
+A comprehensive boilerplate template for building professional software projects with **CLI Coding Agents** (**Claude Code** and **Open Code**). This template provides a complete development environment with AI-powered agent orchestration, automated workflows, and intelligent project management.
 
-> **🔄 MIGRADO A PAYLOAD CMS** - Este proyecto ha sido migrado de Sanity.io a Payload CMS. Ver [MIGRACION-PAYLOAD.md](MIGRACION-PAYLOAD.md) para detalles completos.
+## What is Claude Code?
 
-## 🚀 Stack Tecnológico
+**Claude Code** is Anthropic's official CLI tool that brings AI-powered development assistance directly to your terminal. It enables natural language interaction with your codebase and provides intelligent automation for common development tasks.
 
-### Frontend
-- **[Astro](https://astro.build)** - Framework principal (arquitectura de islas)
-- **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático
-- **[Tailwind CSS](https://tailwindcss.com/)** - Estilos utility-first
-- **[GSAP](https://greensock.com/gsap/)** - Animaciones y efectos parallax
-- **[Swiper.js](https://swiperjs.com/)** - Carruseles y sliders
+- [Claude Code](https://claude.com/product/claude-code)
+- [Docs](https://docs.claude.com/en/docs/claude-code/overview)
 
-### Backend / CMS
-- **[Payload CMS](https://payloadcms.com/)** - Headless CMS TypeScript-native
-- **PostgreSQL** - Base de datos relacional
+**Open Code CLI Coding Agents** extend Claude Code with specialized AI agents that handle specific aspects of software development - from planning and research to testing and documentation. This creates a collaborative AI development team that works alongside human developers.
 
-### Infraestructura
-- **[Vercel](https://vercel.com/)** / **[Netlify](https://www.netlify.com/)** - Hosting y deployment
-- **[Vercel Postgres](https://vercel.com/storage/postgres)** / **[Supabase](https://supabase.com/)** - Base de datos
-- **[Bunny.net](https://bunny.net/)** - CDN para imágenes y videos (opcional)
-- **[GitHub](https://github.com/)** - Control de versiones
+- [Open Code](https://opencode.ai/)
+- [Docs](https://opencode.ai/docs)
 
-### Integraciones
-- **CoverManager** - Sistema de reservas
-- **Google Places API** - Reseñas de clientes
-- **Instagram API** - Feed de Instagram
-- **Google Analytics 4** - Análisis de tráfico
+## Related Projects & Directories
 
-## 📁 Estructura del Proyecto
+- `claudekit` - Website of ClaudeKit
+  - Directory: `../claudekit`
+  - Repo: https://github.com/claudekit/claudekit
+- `claudekit-marketing` - Marketing Kit repository
+  - Directory: `../claudekit-marketing`
+  - Repo: https://github.com/claudekit/claudekit-marketing
+- `claudekit-cli` - CLI tool for quick project setup
+  - Directory: `../claudekit-cli`
+  - Repo: https://github.com/mrgoonie/claudekit-cli
+- `claudekit-docs` - Public documentation repository: https://docs.claudekit.cc
+  - Directory: `../claudekit-docs`
+  - Repo: https://github.com/claudekit/claudekit-docs
+
+## Key Benefits
+
+### 🚀 Accelerated Development
+- **AI-Powered Planning**: Automated technical planning and architecture design
+- **Intelligent Code Generation**: Context-aware code creation and modification
+- **Automated Testing**: Comprehensive test generation and execution
+- **Smart Documentation**: Synchronized docs that evolve with your code
+
+### 🎯 Enhanced Quality
+- **Multi-Agent Code Review**: Specialized agents for security, performance, and standards
+- **Automated Quality Assurance**: Continuous testing and validation
+- **Best Practices Enforcement**: Built-in adherence to coding standards
+- **Security-First Development**: Proactive security analysis and recommendations
+
+### 🏗️ Structured Workflow
+- **Agent Orchestration**: Coordinated AI agents working in parallel and sequential workflows
+- **Task Management**: Automated project tracking and progress monitoring
+- **Documentation Sync**: Always up-to-date technical documentation
+- **Clean Git Workflow**: Professional commit messages and branch management
+
+## Documentation
+
+### 📚 Core Documentation
+- **[Project Overview & PDR](./docs/project-overview-pdr.md)** - Comprehensive project overview, goals, features, and product development requirements
+- **[Codebase Summary](./docs/codebase-summary.md)** - High-level overview of project structure, technologies, and components
+- **[Code Standards](./docs/code-standards.md)** - Coding standards, naming conventions, and best practices
+- **[System Architecture](./docs/system-architecture.md)** - Detailed architecture documentation, component interactions, and data flow
+- **[Skills Reference](./guide/SKILLS.md)** - Complete guide to all available skills
+
+### 📖 Additional Resources
+- **[CLAUDE.md](./CLAUDE.md)** - Development instructions and workflows for AI agents
+- **[CHANGELOG.md](./CHANGELOG.md)** - Version history and release notes
+- **[Windows Statusline Support](./docs/statusline-windows-support.md)** - Windows compatibility guide for Claude Code statusline
+- **[Statusline Architecture](./docs/statusline-architecture.md)** - Technical documentation for statusline implementation
+
+## Quick Start
+
+### Prerequisites
+- [Claude Code](https://code.claude.com/docs/en/setup) installed and configured
+- Git for version control
+- Node.js 18+ (or your preferred runtime)
+- Operating Systems: macOS 10.15+, Ubuntu 20.04+/Debian 10+, or Windows 10+ (with WSL 1, WSL 2, or Git for Windows)
+- Hardware: 4GB+ RAM
+
+### Setup your new project with ClaudeKit
+
+1. **Install ClaudeKit CLI**:
+   ```bash
+   npm install -g claudekit-cli
+   ```
+
+2. **Create your new project with ClaudeKit framework**:
+   ```bash
+   mkdir my-project
+   ck new --dir my-project --kit engineer
+   ```
+
+   **Note:** If you want to use the kit with your existing project:
+   ```bash
+   cd /path/to/project
+   ck init --kit engineer
+   ```
+
+3. **Start development**:
+   ```bash
+   # Begin with Claude Code
+   claude
+   # [YOLO mode - not recommended]
+   # claude --dangerously-skip-permissions
+
+   # now you can use these specific commands
+   /plan "implement user authentication"
+   /cook "add database integration"
+   ```
+
+📖 **Learn more from our docs:** [https://docs.claudekit.cc](https://docs.claudekit.cc)
+
+## Project Structure
 
 ```
-warynessy26/
-├── docs/                      # Documentación del proyecto
-│   ├── agents/               # Definiciones de agentes especializados
-│   ├── info/                 # Información técnica y arquitectura
-│   └── gestion-proyecto.md   # Gestión completa del proyecto
-├── src/                       # Código fuente
-│   ├── components/           # Componentes reutilizables
-│   ├── layouts/              # Layouts de página
-│   ├── pages/                # Páginas del sitio
-│   ├── styles/               # Estilos globales
-│   ├── lib/                  # Utilidades y helpers
-│   └── payload/              # Configuración de Payload CMS
-│       ├── collections/      # Collections (tipos de documento)
-│       └── globals/          # Globals (singletons)
-├── public/                    # Archivos estáticos
-├── media/                     # Archivos subidos al CMS
-├── payload.config.ts          # Configuración de Payload
-├── MIGRACION-PAYLOAD.md       # Guía de migración a Payload
-├── .env.example              # Variables de entorno de ejemplo
-├── .gitignore                # Archivos ignorados por Git
-├── astro.config.mjs          # Configuración de Astro
-├── tailwind.config.mjs       # Configuración de Tailwind
-├── tsconfig.json             # Configuración de TypeScript
-├── package.json              # Dependencias del proyecto
-└── README.md                 # Este archivo
+├── .claude/                 # Claude Code configuration
+│   ├── agents/             # Claude Code agents
+│   ├── command-archive/    # Archived legacy command definitions
+│   ├── hooks/              # Claude Code hooks
+│   │   └── notifications/  # Multi-provider notification system
+│   ├── skills/             # Claude Code skills
+│   └── CLAUDE.md           # Global development instructions
+├── docs/                   # Project documentation
+│   ├── codebase-summary.md # Auto-generated codebase overview
+│   ├── code-standards.md   # Development standards
+│   ├── project-overview-pdr.md # Product requirements
+│   └── development-roadmap.md  # Project roadmap
+├── plans/                  # Implementation plans and reports
+│   ├── templates/          # Plan templates
+│   └── reports/            # Agent-to-agent communication
+├── CLAUDE.md              # Project-specific Claude instructions
+├── AGENTS.md              # Agent coordination guidelines
+└── README.md              # This file
 ```
 
-## 🛠️ Instalación y Configuración
+## The AI Agent Team
 
-### Prerrequisitos
-- Node.js 18+
-- npm, yarn o pnpm
-- PostgreSQL (local o Vercel Postgres / Supabase)
-- Cuenta en Vercel/Netlify (para deployment)
+This boilerplate includes 17+ specialized AI agents that work together to deliver high-quality software. Agents coordinate through file-based communication, enabling sequential chaining and parallel execution patterns.
 
-### 1. Clonar el Repositorio
+### 🎯 Core Development Agents
+
+#### **Planner Agent**
+- Researches technical approaches and best practices
+- Creates comprehensive implementation plans
+- Analyzes architectural trade-offs
+- Spawns multiple researcher agents for parallel investigation
+
+#### **Researcher Agent**
+- Investigates specific technologies and frameworks
+- Analyzes existing solutions and patterns
+- Provides technical recommendations
+- Supports the planner with detailed findings
+
+#### **Tester Agent**
+- Generates comprehensive test suites
+- Validates functionality and performance
+- Ensures cross-platform compatibility
+- Reports on test coverage and quality metrics
+
+### 🔍 Quality Assurance Agents
+
+#### **Code Reviewer Agent**
+- Performs automated code quality analysis
+- Enforces coding standards and conventions
+- Identifies security vulnerabilities
+- Provides improvement recommendations
+
+#### **Debugger Agent**
+- Analyzes application logs and error reports
+- Diagnoses performance bottlenecks
+- Investigates CI/CD pipeline issues
+- Provides root cause analysis
+
+### 📚 Documentation & Management Agents
+
+#### **Docs Manager Agent**
+- Maintains synchronized technical documentation
+- Updates API documentation automatically
+- Ensures documentation accuracy
+- Manages codebase summaries with repomix
+
+#### **Git Manager Agent**
+- Creates clean, conventional commit messages
+- Manages branching and merge strategies
+- Handles version control workflows
+- Ensures professional git history
+
+#### **Project Manager Agent**
+- Tracks development progress and milestones
+- Updates project roadmaps and timelines
+- Manages task completion verification
+- Maintains project health metrics
+
+### 🎨 Design & Content Agents
+
+#### **UI/UX Designer Agent**
+- Creates design specifications and prototypes
+- Develops visual components
+- Ensures design system consistency
+- Performs user experience analysis
+
+#### **Copywriter Agent**
+- Creates marketing and technical content
+- Optimizes copy for conversion
+- Develops documentation narratives
+- Enhances content clarity
+
+### 🔎 Specialized Agents
+
+#### **Scout Agent**
+- Performs parallel codebase exploration
+- Analyzes code patterns and structure
+- Identifies optimization opportunities
+- Maps component relationships
+
+#### **Database Admin Agent**
+- Manages database operations
+- Performs migrations and optimization
+- Ensures data integrity
+- Designs schema patterns
+
+#### **Journal Writer Agent**
+- Documents development decisions
+- Tracks technical explorations
+- Records lessons learned
+- Maintains decision history
+
+## Agent Orchestration Patterns
+
+### Sequential Chaining
+Use when tasks have dependencies:
+```bash
+# Planning → Implementation → Testing → Review
+/plan "implement user dashboard"
+# Wait for plan completion, then:
+/code  # Executes the plan
+# After implementation:
+/test "validate dashboard functionality"
+# Finally:
+/code-review "ensure code quality standards"
+
+# Alternative: Use /cook for standalone implementation (plans internally)
+/cook "implement user dashboard"
+```
+
+### Parallel Execution
+Use for independent tasks:
+```bash
+# Multiple researchers exploring different approaches
+planner agent spawns:
+- researcher (database options)
+- researcher (authentication methods)
+- researcher (UI frameworks)
+# All report back to planner simultaneously
+```
+
+### Context Management
+- Agents communicate through file system reports
+- Context is preserved between agent handoffs
+- Fresh context prevents conversation degradation
+- Essential information is documented in markdown
+
+## Development Workflow
+
+### 1. Feature Development
+```bash
+# Start with planning
+/plan "add real-time notifications"
+
+# Research phase (automatic)
+# Multiple researcher agents investigate approaches
+
+# Implementation
+/cook "implement notification system"
+
+# Quality assurance
+/test
+/code-review
+
+# Documentation update
+/docs
+
+# Project tracking
+/watzup  # Check project status
+```
+
+### 2. Bug Fixing
+```bash
+# Analyze the issue
+/debug "investigate login failures"
+
+# Create fix plan
+/plan "resolve authentication bug"
+
+# Implement solution
+/fix "authentication issue"
+
+# Validate fix
+/test
+```
+
+### 3. Documentation Management
+```bash
+# Update documentation
+/docs
+
+# Generate codebase summary
+repomix  # Creates ./docs/codebase-summary.md
+
+# Review project status
+/watzup
+```
+
+## Configuration Files
+
+### CLAUDE.md
+Project-specific instructions for Claude Code. Customize this file to define:
+- Project architecture guidelines
+- Development standards and conventions
+- Agent coordination protocols
+- Specific workflows for your project
+
+### plans/templates/*.md
+Reusable templates for:
+- Feature implementation plans
+- Bug fix procedures
+- Refactoring strategies
+- Architecture decisions
+
+## Gemini Skills Configuration
+
+This project includes several Gemini-powered skills that require a Google Gemini API key:
+
+- **gemini-audio** - Audio analysis and speech generation
+- **gemini-video-understanding** - Video analysis and understanding
+- **gemini-document-processing** - PDF document processing
+- **gemini-image-gen** - AI image generation
+- **gemini-vision** - Image analysis and vision capabilities
+
+### API Key Setup
+
+The Gemini skills check for `GEMINI_API_KEY` in the following order (priority from highest to lowest):
+
+1. **Environment Variable** (Recommended for development)
+   ```bash
+   export GEMINI_API_KEY='your-api-key-here'
+   ```
+
+2. **Project Root `.env`** (Recommended for project-specific keys)
+   ```bash
+   # Create .env in project root
+   echo 'GEMINI_API_KEY=your-api-key-here' > .env
+   ```
+
+3. **`.claude/.env`** (For Claude-specific configuration)
+   ```bash
+   # Copy example and edit
+   cp .claude/.env.example .claude/.env
+   # Then edit .claude/.env and set your API key
+   ```
+
+4. **`.claude/skills/.env`** (For shared skills configuration)
+   ```bash
+   # Copy example and edit
+   cp .claude/skills/.env.example .claude/skills/.env
+   # Then edit .claude/skills/.env and set your API key
+   ```
+
+5. **Individual Skill Directory `.env`** (For skill-specific keys)
+   ```bash
+   # Example for gemini-audio skill
+   cp .claude/skills/gemini-audio/.env.example .claude/skills/gemini-audio/.env
+   # Then edit and set your API key
+   ```
+
+### Getting Your API Key
+
+Get your free Gemini API key at: https://aistudio.google.com/apikey
+
+### Vertex AI Support
+
+To use Vertex AI instead of Google AI Studio:
 
 ```bash
-git clone https://github.com/nemesiovillena/web-warynessy-2026.git
-cd web-warynessy-2026
+# Enable Vertex AI
+export GEMINI_USE_VERTEX=true
+export VERTEX_PROJECT_ID=your-gcp-project-id
+export VERTEX_LOCATION=us-central1  # Optional, defaults to us-central1
 ```
 
-### 2. Instalar Dependencias
+Or in `.env` file:
+```
+GEMINI_USE_VERTEX=true
+VERTEX_PROJECT_ID=your-gcp-project-id
+VERTEX_LOCATION=us-central1
+```
+
+### Usage Examples
 
 ```bash
-npm install
+# Audio analysis
+claude "Analyze this audio file and summarize the key points: audio.mp3"
+
+# Video understanding
+claude "Describe what happens in this video: video.mp4"
+
+# Document processing
+claude "Extract all tables from this PDF: document.pdf"
+
+# Image generation
+claude "Generate an image of a serene mountain landscape"
+
+# Image analysis
+claude "What objects are in this image: photo.jpg"
 ```
 
-### 3. Configurar Variables de Entorno
+## Model Context Protocol (MCP)
 
-Copia el archivo `.env.example` a `.env`:
+✍️ Please read [my technical blog article about MCP here](https://faafospecialist.substack.com/p/claude-code-solution-to-use-mcp-servers).
 
+### Pre-requisites
+
+In ClaudeKit, you need to setup the MCP servers in `.claude/.mcp.json` file.
+
+Copy the example file:
 ```bash
-cp .env.example .env
+mv .claude/.mcp.json.example .claude/.mcp.json
 ```
 
-Edita `.env` con tus credenciales:
+Then add your MCP servers, below are some examples:
 
-```env
-# Payload CMS
-DATABASE_URL=postgresql://user:password@localhost:5432/warynessy
-PAYLOAD_PUBLIC_SERVER_URL=http://localhost:3000
-PUBLIC_PAYLOAD_API_URL=http://localhost:3000/api
-PAYLOAD_SECRET=tu-secret-generado
-
-# Google APIs
-PUBLIC_GOOGLE_PLACES_API_KEY=tu-api-key
-# Analíticas y CDN
-PUBLIC_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
-PUBLIC_BUNNY_CDN_URL=https://tu-zona.b-cdn.net
+### [Context7](https://github.com/upstash/context7)
+```json
+{
+   "mcpServers": {
+      "context7": {
+         "command": "npx",
+         "args": ["-y", "@upstash/context7-mcp", "--api-key", "YOUR_API_KEY"],
+      }
+   }
+}
 ```
 
-#### Generar PAYLOAD_SECRET
+### [Human MCP](https://github.com/mrgoonie/human-mcp/)
 
+```json
+{
+   "mcpServers": {
+      "human": {
+         "command": "npx",
+         "args": ["@goonnguyen/human-mcp@latest"],
+         "env": { "GOOGLE_GEMINI_API_KEY": "YOUR_API_KEY" }
+      }
+   }
+}
+```
+
+### [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp)
+```json
+{
+   "mcpServers": {
+      "chrome-devtools": {
+         "command": "npx",
+         "args": ["-y", "chrome-devtools-mcp@latest"]
+      }
+   }
+}
+```
+
+## Best Practices
+
+### Development Principles
+- **YAGNI**: You Aren't Gonna Need It - avoid over-engineering
+- **KISS**: Keep It Simple, Stupid - prefer simple solutions
+- **DRY**: Don't Repeat Yourself - eliminate code duplication
+
+### Code Quality
+- All code changes go through automated review
+- Comprehensive testing is mandatory
+- Security considerations are built-in
+- Performance optimization is continuous
+
+### Documentation
+- Documentation evolves with code changes
+- API docs are automatically updated
+- Architecture decisions are recorded
+- Codebase summaries are regularly refreshed
+
+### Git Workflow
+- Clean, conventional commit messages
+- Professional git history
+- No AI attribution in commits
+- Focused, atomic commits
+
+## Usage Examples
+
+### Starting a New Feature
 ```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# Research and plan
+claude "I need to implement user authentication with OAuth2"
+# Planner agent creates comprehensive plan
+
+# Follow the plan
+claude "Implement the authentication plan"
+# Implementation follows the detailed plan
+
+# Ensure quality
+claude "Review and test the authentication system"
+# Testing and code review agents validate the implementation
 ```
 
-### 4. Configurar Base de Datos
-
-Tienes varias opciones para PostgreSQL:
-
-#### Opción A: Vercel Postgres (Recomendado)
-1. Ve a tu proyecto en Vercel
-2. Pestaña "Storage" > "Create Database" > "Postgres"
-3. Copia el `DATABASE_URL`
-4. Pégalo en tu `.env`
-
-#### Opción B: Supabase (Gratuito)
-1. Crea cuenta en [supabase.com](https://supabase.com)
-2. Crea un nuevo proyecto
-3. Settings > Database > Connection string
-4. Copia y pega en `.env`
-
-#### Opción C: PostgreSQL Local
+### Debugging Issues
 ```bash
-# Instalar PostgreSQL
-brew install postgresql@14  # macOS
-# o
-sudo apt install postgresql  # Linux
+# Investigate problem
+claude "Debug the slow database queries"
+# Debugger agent analyzes logs and performance
 
-# Crear base de datos
-createdb warynessy
+# Create solution
+claude "Optimize the identified query performance issues"
+# Implementation follows debugging recommendations
 
-# Configurar DATABASE_URL en .env
-DATABASE_URL=postgresql://localhost:5432/warynessy
+# Validate fix
+claude "Test query performance improvements"
+# Tester agent validates the optimization
 ```
 
-### 5. Iniciar Payload CMS
-
+### Project Maintenance
 ```bash
-# Ejecutar migraciones
-npm run payload migrate
+# Check project health
+claude "What's the current project status?"
+# Project manager provides comprehensive status
 
-# Iniciar servidor de Payload
-npm run dev:payload
+# Update documentation
+claude "Sync documentation with recent changes"
+# Docs manager updates all relevant documentation
+
+# Plan next sprint
+claude "Plan the next development phase"
+# Planner creates detailed roadmap for upcoming work
 ```
 
-El admin panel estará disponible en `http://localhost:3000/admin`
+## Advanced Features
 
-**Primera vez**: Al acceder a `/admin`, Payload te pedirá crear un usuario administrador.
+### Multi-Project Support
+- Manage multiple repositories simultaneously
+- Shared agent configurations across projects
+- Consistent development patterns
 
-### 6. Ejecutar en Desarrollo
+### Custom Agent Creation
+- Define project-specific agents
+- Extend existing agent capabilities
+- Create domain-specific expertise
 
-```bash
-npm run dev
-```
+### Integration Capabilities
+- **Multi-provider notifications** (Telegram, Discord, Slack) with smart throttling
+- GitHub Actions integration
+- CI/CD pipeline enhancement
 
-El sitio estará disponible en `http://localhost:4321`
+See `.claude/hooks/notifications/docs/` for setup guides.
 
-## 📝 Scripts Disponibles
+## Customization Guide
 
-```bash
-npm run dev              # Inicia el servidor de desarrollo de Astro
-npm run dev:payload      # Inicia el servidor de Payload CMS
-npm run build            # Construye el sitio y Payload para producción
-npm run build:payload    # Construye solo Payload
-npm run preview          # Preview del build de producción
-npm run generate:types   # Genera tipos TypeScript desde Payload
-npm run astro            # Ejecuta comandos de Astro CLI
-npm run payload          # Ejecuta comandos de Payload CLI
-```
+### 1. Project Setup
+- Update `CLAUDE.md` with your project specifics
+- Customize plan templates in `plans/templates/`
 
-## 🌐 Deployment
+### 2. Agent Specialization
+- Add domain-specific knowledge to agents
+- Create custom agents for unique requirements
+- Configure agent interaction patterns
 
-### Vercel (Recomendado)
+### 3. Workflow Optimization
+- Define project-specific commands
+- Create shortcuts for common tasks
+- Establish team coding standards
 
-1. Conecta tu repositorio en [vercel.com](https://vercel.com)
-2. Configura las variables de entorno en el dashboard
-3. Añade Vercel Postgres desde la pestaña Storage
-4. Deploy automático en cada push a `main`
+## Contributing
 
-### Netlify
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Follow the agent orchestration workflow
+4. Ensure all tests pass and documentation is updated
+5. Create a Pull Request
 
-1. Conecta tu repositorio en [netlify.com](https://netlify.com)
-2. Configura las variables de entorno
-3. Build command: `npm run build`
-4. Publish directory: `dist`
-5. Configura PostgreSQL externo (Supabase recomendado)
+## License
 
-## 📋 Gestión del Proyecto
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Para ver todas las tareas, fases y progreso del proyecto, consulta:
+## Learn More
 
-📄 **[docs/gestion-proyecto.md](docs/gestion-proyecto.md)**
+### Claude Code Resources
+- [Claude Code Documentation](https://claude.ai/code)
 
-Este documento contiene:
-- 9 fases de desarrollo con +330 tareas
-- Estado actual del proyecto
-- Próximos pasos
-- Notas técnicas y decisiones
-- Riesgos identificados
+### Community
+- [ClaudeKit Community](https://claudekit.cc/discord)
+- [Discussion Forum](https://github.com/anthropic/claude-code/discussions)
+- [Example Projects](https://github.com/topics/claude-code)
 
-## 📚 Documentación Adicional
-
-- **[MIGRACION-PAYLOAD.md](MIGRACION-PAYLOAD.md)** - Guía completa de migración a Payload
-- **[Stack Tecnológico](docs/info/stack-tecnologico.md)** - Detalles del stack elegido
-- **[Arquitectura de Datos](docs/info/arquitectura-datos.md)** - Estructura de datos del CMS
-- **[Paleta de Colores](docs/info/paleta-colores.md)** - Colores del diseño
-- **[Puntos Críticos](docs/info/puntos-criticos.md)** - Consideraciones importantes
-- **[Mock Data](docs/info/mock-data.md)** - Datos de prueba
-
-## 🎯 Características Principales
-
-- ✅ **Rendimiento Ultra-Rápido**: Astro con arquitectura de islas
-- ✅ **CMS TypeScript-Native**: Payload CMS con control total
-- ✅ **Base de Datos Propia**: PostgreSQL sin vendor lock-in
-- ✅ **Carta Dinámica**: Actualización en tiempo real desde el CMS
-- ✅ **Gestión de Menús**: Sistema independiente de menús
-- ✅ **Reservas Online**: Integración con CoverManager
-- ✅ **Animaciones Suaves**: Parallax y efectos con GSAP
-- ✅ **Responsive**: Optimizado para móviles y tablets
-- ✅ Analíticas Avanzadas: GA4 integrado con tracking de eventos de conversión
-- ✅ Optimización de Imágenes: Soporte para Bunny.net CDN
-- ✅ **Sin Costos Ocultos**: Open-source, sin pago por API calls
-
-## 🔧 Mantenimiento
-
-### Actualizar Contenido
-
-1. Accede a Payload Admin Panel (`http://localhost:3000/admin`)
-2. Edita el contenido necesario
-3. Guarda los cambios
-4. El sitio se reconstruirá automáticamente (webhook)
-
-### Actualizar Dependencias
-
-```bash
-npm update
-# o
-npm outdated  # Ver dependencias desactualizadas
-```
-
-### Backup del CMS
-
-```bash
-# Backup de PostgreSQL
-pg_dump -U user warynessy > backup.sql
-
-# O usar herramientas de Vercel/Supabase para backups automáticos
-```
-
-## 🐛 Debugging
-
-### Logs de Build
-
-Vercel/Netlify proporcionan logs detallados de cada build en su dashboard.
-
-### Errores Comunes
-
-1. **Error de Build**: Verifica que todas las variables de entorno estén configuradas
-2. **Imágenes no cargan**: Verifica que el directorio `media/` exista y tenga permisos
-3. **CMS no conecta**: Verifica `DATABASE_URL` y que PostgreSQL esté corriendo
-4. **Error en Payload**: Verifica que `PAYLOAD_SECRET` esté configurado
-
-Ver [MIGRACION-PAYLOAD.md](MIGRACION-PAYLOAD.md) para más troubleshooting.
-
-## 📞 Soporte y Contacto
-
-- **Repositorio**: [github.com/nemesiovillena/web-warynessy-2026](https://github.com/nemesiovillena/web-warynessy-2026)
-- **Issues**: [GitHub Issues](https://github.com/nemesiovillena/web-warynessy-2026/issues)
-
-## 📄 Licencia
-
-© 2026 Restaurante Warynessy. Todos los derechos reservados.
+### Support
+- [Issue Tracker](https://github.com/anthropic/claude-code/issues)
+- [Feature Requests](https://github.com/anthropic/claude-code/discussions/categories/ideas)
+- [Documentation](https://docs.claude.ai/code)
 
 ---
 
-**Última actualización:** 2026-01-14
-**Versión:** 1.0.0
-**Estado:** 🟡 En Desarrollo
-**CMS:** Payload CMS (migrado desde Sanity.io)
-# idiomas.warynessy
+**Start building with AI-powered development today!** This boilerplate provides everything you need to create professional software with intelligent agent assistance.

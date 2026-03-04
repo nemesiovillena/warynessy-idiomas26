@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { callTranslationAgent, translateLexical } from '../utils/translation-utils'
 
 export const Paginas: CollectionConfig = {
     slug: 'paginas',
@@ -16,6 +17,68 @@ export const Paginas: CollectionConfig = {
         create: () => true,
         update: () => true,
         delete: () => true,
+    },
+    hooks: {
+        afterChange: [
+            async ({ doc, previousDoc, operation, req }) => {
+                // Solo si el usuario ha solicitado traducción y no es una petición interna
+                if ((operation === 'create' || operation === 'update')) {
+                    const payload = req.payload;
+                    try {
+                        // Evitar bucles: solo traducir si el locale de la petición es 'es'
+                        if ((req as any).locale !== 'es') return;
+
+                        console.log(`[PAGINAS] Iniciando traducción automática para: ${doc.tituloInterno}`);
+
+                        const configTraduccion: any = await payload.findGlobal({ slug: 'configuracion-traduccion' as any });
+                        const endpoint = configTraduccion.endpointAgente || 'http://localhost:8000/translate';
+                        const modelo = configTraduccion.modeloIA;
+
+                        const targetLocales = ['ca', 'en', 'fr', 'de'] as const;
+                        const fieldsToTranslate = ['heroTitle', 'heroSubtitle', 'historiaMision', 'metaTitle', 'metaDescription'];
+
+                        await Promise.all(targetLocales.map(async (locale) => {
+                            const translatedData: any = {};
+                            let hasTranslations = false;
+
+                            await Promise.all(fieldsToTranslate.map(async (field) => {
+                                const value = doc[field];
+                                if (!value) return;
+                                const prevValue = previousDoc?.[field];
+                                const changed = operation === 'create' || JSON.stringify(value) !== JSON.stringify(prevValue);
+                                if (!changed) return;
+
+                                // Si es RichText (Lexical)
+                                if (typeof value === 'object' && value !== null && value.root) {
+                                    console.log(`[PAGINAS] Traduciendo RichText: ${field} al locale ${locale}...`);
+                                    translatedData[field] = await translateLexical(value, locale, endpoint, modelo);
+                                    hasTranslations = true;
+                                }
+                                // Si es texto plano
+                                else if (typeof value === 'string' && value.trim().length > 0) {
+                                    console.log(`[PAGINAS] Traduciendo texto: ${field} al locale ${locale}...`);
+                                    translatedData[field] = await callTranslationAgent(value, locale, endpoint, modelo);
+                                    hasTranslations = true;
+                                }
+                            }));
+
+                            if (hasTranslations) {
+                                console.log(`[PAGINAS] Aplicando traducciones a locale ${locale}...`);
+                                await (payload as any).update({
+                                    collection: 'paginas',
+                                    id: doc.id,
+                                    locale: locale as any,
+                                    data: translatedData,
+                                    req: { ...req, disableHooks: true } as any,
+                                });
+                            }
+                        }));
+                    } catch (error) {
+                        console.error('[PAGINAS] Error en hook de traducción:', error);
+                    }
+                }
+            }
+        ]
     },
     fields: [
         {
@@ -54,11 +117,13 @@ export const Paginas: CollectionConfig = {
                             name: 'heroTitle',
                             type: 'text',
                             label: 'Título de la Cabecera',
+                            localized: true,
                         },
                         {
                             name: 'heroSubtitle',
                             type: 'textarea',
                             label: 'Subtítulo de la Cabecera',
+                            localized: true,
                         },
                     ],
                 },
@@ -129,6 +194,7 @@ export const Paginas: CollectionConfig = {
                             name: 'historiaMision',
                             type: 'textarea',
                             label: 'Nuestra Misión / Introducción',
+                            localized: true,
                         },
                         {
                             name: 'historiaHitos',
@@ -140,12 +206,14 @@ export const Paginas: CollectionConfig = {
                                     type: 'text',
                                     label: 'Título del Hito (ej: Los Inicios)',
                                     required: true,
+                                    localized: true,
                                 },
                                 {
                                     name: 'descripcion',
                                     type: 'textarea',
                                     label: 'Descripción del Hito',
                                     required: true,
+                                    localized: true,
                                 },
                                 {
                                     name: 'imagen',
@@ -164,6 +232,7 @@ export const Paginas: CollectionConfig = {
                             name: 'metaTitle',
                             type: 'text',
                             label: 'Título SEO (Meta Title)',
+                            localized: true,
                             admin: {
                                 description: 'Aparece en la pestaña del navegador y Google',
                             },
@@ -172,6 +241,7 @@ export const Paginas: CollectionConfig = {
                             name: 'metaDescription',
                             type: 'textarea',
                             label: 'Descripción SEO (Meta Description)',
+                            localized: true,
                             admin: {
                                 description: 'Breve resumen para los resultados de búsqueda',
                             },

@@ -25,12 +25,18 @@ import { Espacios } from './src/payload/collections/Espacios'
 import { Banners } from './src/payload/collections/Banners'
 import { Archivos } from './src/payload/collections/Archivos'
 import { Usuarios } from './src/payload/collections/Usuarios'
+import { es } from '@payloadcms/translations/languages/es'
+import { en } from '@payloadcms/translations/languages/en'
+import { ca } from '@payloadcms/translations/languages/ca'
+import { de } from '@payloadcms/translations/languages/de'
+import { fr } from '@payloadcms/translations/languages/fr'
 import { Paginas } from './src/payload/collections/Paginas'
 import { Experiencias } from './src/payload/collections/Experiencias'
 
 // Globals
 import { PaginaInicio } from './src/payload/globals/PaginaInicio'
 import { ConfiguracionSitio } from './src/payload/globals/ConfiguracionSitio'
+import { ConfiguracionTraduccion } from './src/payload/globals/ConfiguracionTraduccion'
 
 // Plugin de backups granulares
 import { backupPlugin } from './plugins/backupPlugin'
@@ -45,6 +51,23 @@ export default buildConfig({
     meta: {
       titleSuffix: '- Warynessy CMS',
     },
+  },
+
+  // Internacionalización (i18n)
+  localization: {
+    locales: [
+      { label: 'Español', code: 'es' },
+      { label: 'Valencià', code: 'ca' },
+      { label: 'English', code: 'en' },
+      { label: 'Français', code: 'fr' },
+      { label: 'Deutsch', code: 'de' },
+    ],
+    defaultLocale: 'es',
+    fallback: true,
+  },
+  i18n: {
+    fallbackLanguage: 'es',
+    supportedLanguages: { es, en, ca, de, fr },
   },
 
   // Colecciones (tipos de documentos)
@@ -62,10 +85,10 @@ export default buildConfig({
     MenusGrupo,
   ],
 
-  // Globals (singletons)
   globals: [
     PaginaInicio,
     ConfiguracionSitio,
+    ConfiguracionTraduccion,
   ],
 
   // Configuraciรณn del editor
