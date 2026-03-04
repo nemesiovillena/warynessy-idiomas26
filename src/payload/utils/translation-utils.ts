@@ -161,8 +161,7 @@ export async function translateDocument({
                 console.log(`[TranslateTool] Traduciendo Texto: ${field} al locale ${targetLang}...`);
                 const translated = await callTranslationAgent(value, targetLang, endpoint, model);
 
-                // Solo guardar si la traducción es diferente al original (para evitar bucles)
-                if (translated && translated !== value) {
+                if (translated) {
                     translatedData[field] = translated;
                     hasTranslations = true;
                 }

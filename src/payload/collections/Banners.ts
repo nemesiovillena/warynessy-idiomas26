@@ -15,7 +15,13 @@ export const Banners: CollectionConfig = {
   hooks: {
     afterChange: [
       async ({ doc, previousDoc, operation, req }) => {
-        if ((req as any).locale !== 'es') return;
+        const locale = (req as any).locale;
+
+        // PROTECCIÓN CRÍTICA: Solo traducir si estamos editando explícitamente en español
+        if (locale !== 'es') {
+          return;
+        }
+
         if (operation === 'create' || operation === 'update') {
           const payload = req.payload
           const executeTranslations = async () => {

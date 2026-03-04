@@ -10,7 +10,12 @@ export const ConfiguracionSitio: GlobalConfig = {
   hooks: {
     afterChange: [
       async ({ doc, previousDoc, req }) => {
-        if ((req as any).locale !== 'es') return;
+        const locale = (req as any).locale;
+
+        // PROTECCIÓN CRÍTICA: Solo traducir si estamos editando explícitamente en español
+        if (locale !== 'es') {
+          return;
+        }
 
         const payload = req.payload;
 

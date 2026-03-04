@@ -10,8 +10,12 @@ export const PaginaInicio: GlobalConfig = {
   hooks: {
     afterChange: [
       async ({ doc, previousDoc, req }) => {
-        // Solo si venimos de la versión en español
-        if ((req as any).locale !== 'es') return;
+        const locale = (req as any).locale;
+
+        // PROTECCIÓN CRÍTICA: Solo traducir si estamos editando explícitamente en español
+        if (locale !== 'es') {
+          return;
+        }
 
         const payload = req.payload;
 
