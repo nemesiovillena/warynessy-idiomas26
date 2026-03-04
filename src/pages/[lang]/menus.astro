@@ -34,9 +34,11 @@ const pageTitle = pageData?.metaTitle || `Menús | ${siteSettings?.title || "War
 const pageDescription = pageData?.metaDescription || "Descubre nuestros menús degustación y opciones especiales.";
 
 // Imagen Hero desde el CMS o fallback
-const heroImg = typeof pageData?.heroImage === 'object' && pageData?.heroImage?.url
+const rawHeroImg = typeof pageData?.heroImage === 'object' && pageData?.heroImage?.url
   ? pageData.heroImage.url
   : 'https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80';
+
+const heroImg = getOptimizedImageUrl(rawHeroImg);
 
 
 // Obtener IDs de menús que están en grupos para excluirlos de la sección individual

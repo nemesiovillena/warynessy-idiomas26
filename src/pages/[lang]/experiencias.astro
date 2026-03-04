@@ -3,6 +3,7 @@ import MainLayout from '../../layouts/MainLayout.astro';
 import Section from '../../components/ui/Section.astro';
 import Container from '../../components/ui/Container.astro';
 import { getSiteSettings, getPaginaBySlug } from '../../lib/payload-local';
+import { getOptimizedImageUrl } from '../../lib/cdn';
 
 const { lang } = Astro.params;
 const locale = lang || 'es';
@@ -23,9 +24,11 @@ const pageTitle = pageData?.metaTitle || `Experiencias | ${siteSettings?.title |
 const pageDescription = pageData?.metaDescription || "Regala una experiencia gastronómica inolvidable en Warynessy.";
 
 // Imagen Hero desde el CMS o fallback
-const heroImg = typeof pageData?.heroImage === 'object' && pageData?.heroImage?.url
+const rawHeroImg = typeof pageData?.heroImage === 'object' && pageData?.heroImage?.url
   ? pageData.heroImage.url
   : 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80';
+
+const heroImg = getOptimizedImageUrl(rawHeroImg);
 ---
 
 <MainLayout title={pageTitle} description={pageDescription} noPaddingTop={true}>
