@@ -59,15 +59,16 @@ const menusIndividuales = menus.filter((menu: any) => !menuIdsEnGrupos.has(menu.
       <div class="absolute inset-0 bg-cover bg-center opacity-30" style={`background-image: url('${heroImg}')`}></div>
       <div class="absolute inset-0 bg-gradient-to-t from-matte-black via-matte-black/60 to-transparent"></div>
       <Container class="relative z-10 text-center animate-fade-up">
-         <span class="text-primary font-black tracking-[0.3em] uppercase text-sm mb-4 block">
-            {ui.badge}
-         </span>
-         <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 uppercase tracking-tight">
-           {ui.title}
-         </h1>
-         <p class="text-white/50 text-base md:text-lg max-w-2xl mx-auto font-medium">
-           {ui.subtitle}
-         </p>
+         {pageData?.heroTitle && (
+           <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 uppercase tracking-tight">
+             {pageData.heroTitle}
+           </h1>
+         )}
+         {pageData?.heroSubtitle && (
+           <span class="text-primary font-black tracking-[0.3em] uppercase text-sm mb-4 block">
+             {pageData.heroSubtitle}
+           </span>
+         )}
       </Container>
    </section>
 

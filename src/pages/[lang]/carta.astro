@@ -176,19 +176,18 @@ const heroImage = getOptimizedImageUrl(rawHeroImage);
 
   {/* Header Hero for Menu */}
   <section class="relative pt-32 pb-6 md:pt-48 md:pb-8 bg-matte-black overflow-hidden">
-     <div class="absolute inset-0 bg-cover bg-center opacity-30" style={`background-image: url('${heroImage}')`}></div>
-     <div class="absolute inset-0 bg-gradient-to-t from-matte-black via-matte-black/80 to-transparent"></div>
-     <Container class="relative z-10 text-center animate-fade-up">
-        <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm mb-4 block">
-          {pageData?.heroSubtitle || "Gastronomía"}
-        </span>
-        <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6">
-          {pageData?.heroTitle || "Nuestra Carta"}
-        </h1>
-        <p class="text-white/50 text-base max-w-xl mx-auto">
-          Cocina mediterránea con los mejores productos de mercado
-        </p>
-     </Container>
+      <Container class="relative z-10 text-center animate-fade-up">
+        {pageData?.heroTitle && (
+          <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6">
+            {pageData.heroTitle}
+          </h1>
+        )}
+        {pageData?.heroSubtitle && (
+          <span class="text-primary font-bold tracking-[0.3em] uppercase text-sm mb-4 block">
+            {pageData.heroSubtitle}
+          </span>
+        )}
+      </Container>
   </section>
 
   <Section class="bg-matte-black min-h-screen pt-8 pb-12 md:pt-12 md:pb-16">

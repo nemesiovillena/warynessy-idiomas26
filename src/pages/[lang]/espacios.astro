@@ -66,7 +66,6 @@ const splitImages = [
       
       <!-- Hero/Intro Section within Scroll -->
       <section class="pt-24 pb-12 px-8 md:px-16 animate-fade-up">
-         <span class="text-primary font-bold tracking-[0.3em] uppercase text-xs mb-4 block">{ui.badge}</span>
          {pageData?.heroTitle && (
            <h1 class="text-5xl md:text-7xl font-display font-black text-white mb-6 uppercase tracking-tighter">
              {pageData.heroTitle}
@@ -77,6 +76,7 @@ const splitImages = [
               {pageData.heroSubtitle}
            </p>
          )}
+         {/* Se ha eliminado el badge secundario de ui.badge */}
          {pageData?.descripcionEspacios && (
            <div class="mt-6">
              <RichText content={pageData.descripcionEspacios} class="text-gray-400 text-base leading-relaxed" />
