@@ -23,6 +23,7 @@ PAYLOAD_PASSWORD = "W965801047n"
 
 # Colecciones con sus campos localizados traducibles (texto libre)
 COLLECTIONS = {
+    "alergenos": ["nombre", "descripcion"],
     "menus": ["nombre", "descripcion_menu", "etiqueta", "fechasDias"],
     "categorias": ["nombre", "descripcion"],
     "platos": ["nombre", "descripcion"],
