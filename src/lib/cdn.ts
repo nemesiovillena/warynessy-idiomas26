@@ -33,9 +33,11 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
     const isDevelopment = getEnv('NODE_ENV') === 'development';
     const isLocalPath = src.includes('localhost') || src.includes('127.0.0.1') || (!src.startsWith('http') && isDevelopment);
 
-    // Si estamos en desarrollo y es una ruta local, no forzamos el CDN
-    // a menos que no haya otra opción.
-    const shouldIgnoreCDN = isDevelopment && isLocalPath;
+    // En desarrollo, normalmente ignoramos el CDN para usar archivos locales.
+    // Pero si el usuario quiere ver las imágenes del CDN porque no las tiene en local,
+    // permitimos el uso del CDN si existe la URL configurada.
+    const FORCE_CDN = getEnv('PUBLIC_FORCE_CDN_LOCAL') === 'true';
+    const shouldIgnoreCDN = isDevelopment && isLocalPath && !FORCE_CDN;
 
     // Normalizar src si viene como path relativo
     let path = src;
