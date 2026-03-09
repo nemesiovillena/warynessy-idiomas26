@@ -99,7 +99,16 @@ export async function translateDocument({
     const translatedData: any = {};
     let hasTranslations = false;
 
+    // Función auxiliar para extraer el ID si es un objeto de Payload
+    const extractId = (val: any) => {
+        if (typeof val === 'object' && val !== null && val.id !== undefined) {
+            return val.id;
+        }
+        return val;
+    };
+
     console.log(`[TranslateTool] Procesando traducción para locale: ${targetLang}`);
+    // console.log(`[TranslateTool] DEBUG: doc keys = ${Object.keys(doc).join(', ')}`);
 
     for (const field of fields) {
         try {
@@ -108,14 +117,16 @@ export async function translateDocument({
 
             const prevValue = previousDoc?.[field];
             // Comprobación profunda para cambios
-            // Si el valor previo es nulo/indefinido o el JSON es diferente, consideramos que ha cambiado
+            // Siempre traducimos si es una creación. 
+            // Si es una actualización, traducimos si el valor ha cambiado.
             const isChanged = operation === 'create' ||
                 !prevValue ||
                 JSON.stringify(value) !== JSON.stringify(prevValue);
 
+            // [NUEVO] Si el valor es el mismo pero sospechamos que no está traducido (fuerza bruta), podemos forzarlo
+            // Por ahora, si es una actualización manual, permitimos que se fuerce si el usuario vuelve a guardar
             if (!isChanged) {
-                console.log(`[TranslateTool] Omitiendo campo '${field}' porque no ha cambiado.`);
-                continue;
+                console.log(`[TranslateTool] Campo '${field}' no ha cambiado, pero procedemos para asegurar traducción en ${targetLang}.`);
             }
 
             // Caso 1: RichText (Lexical)
@@ -128,16 +139,39 @@ export async function translateDocument({
             else if (Array.isArray(value)) {
                 console.log(`[TranslateTool] Traduciendo Array: ${field} (${value.length} elementos) al locale ${targetLang}...`);
                 const translatedArray = [];
+                const KEYS_TO_SKIP = ['id', 'imagen', 'archivo', 'file', 'url', 'filename', 'mimeType', 'filesize', 'width', 'height', 'createdAt', 'updatedAt'];
+
                 for (const item of value) {
                     if (typeof item === 'object' && item !== null) {
-                        const translatedItem = { ...item };
+                        const translatedItem: any = {};
                         for (const subKey in item) {
+                            // SIEMPRE saltamos el 'id' dentro de arrays para que Payload genere nuevos para el nuevo locale
+                            if (subKey === 'id') continue;
+
+                            if (KEYS_TO_SKIP.includes(subKey)) {
+                                translatedItem[subKey] = extractId(item[subKey]);
+                                continue;
+                            }
+
                             if (typeof item[subKey] === 'string' && item[subKey].trim().length > 0) {
+                                // Omitir si parece un ID (24 hex) o una UUID
+                                if (/^[0-9a-fA-F]{24}$/.test(item[subKey]) || /^[0-9a-fA-F-]{36}$/.test(item[subKey])) {
+                                    translatedItem[subKey] = item[subKey];
+                                    continue;
+                                }
+
                                 translatedItem[subKey] = await callTranslationAgent(item[subKey], targetLang, endpoint, model);
+                            } else {
+                                translatedItem[subKey] = extractId(item[subKey]);
                             }
                         }
                         translatedArray.push(translatedItem);
                     } else if (typeof item === 'string' && item.trim().length > 0) {
+                        // Omitir si parece un ID
+                        if (/^[0-9a-fA-F]{24}$/.test(item) || /^[0-9a-fA-F-]{36}$/.test(item)) {
+                            translatedArray.push(item);
+                            continue;
+                        }
                         translatedArray.push(await callTranslationAgent(item, targetLang, endpoint, model));
                     } else {
                         translatedArray.push(item);
@@ -151,10 +185,25 @@ export async function translateDocument({
                 console.log(`[TranslateTool] Traduciendo Grupo/Objeto: ${field} al locale ${targetLang}...`);
                 const translatedGroup = { ...value };
                 let groupChanged = false;
+                const KEYS_TO_SKIP = ['id', 'imagen', 'archivo', 'file', 'url', 'filename', 'mimeType', 'filesize', 'width', 'height', 'createdAt', 'updatedAt'];
+
                 for (const subKey in value) {
+                    if (subKey === 'id') continue;
+                    if (KEYS_TO_SKIP.includes(subKey)) {
+                        translatedGroup[subKey] = extractId(value[subKey]);
+                        continue;
+                    }
                     if (typeof value[subKey] === 'string' && value[subKey].trim().length > 0) {
+                        // Omitir si parece un ID
+                        if (/^[0-9a-fA-F]{24}$/.test(value[subKey]) || /^[0-9a-fA-F-]{36}$/.test(value[subKey])) {
+                            translatedGroup[subKey] = value[subKey];
+                            continue;
+                        }
+
                         translatedGroup[subKey] = await callTranslationAgent(value[subKey], targetLang, endpoint, model);
                         groupChanged = true;
+                    } else {
+                        translatedGroup[subKey] = extractId(value[subKey]);
                     }
                 }
                 if (groupChanged) {
@@ -171,6 +220,10 @@ export async function translateDocument({
                     translatedData[field] = translated;
                     hasTranslations = true;
                 }
+            }
+            // Caso 5: Otros (Numbers, Booleans, IDs) - Preservar
+            else {
+                translatedData[field] = extractId(value);
             }
         } catch (fieldError) {
             console.error(`[TranslateTool] Error traduciendo campo '${field}' a '${targetLang}':`, fieldError);

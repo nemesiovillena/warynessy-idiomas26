@@ -73,11 +73,59 @@ export const cartaPageTranslations = {
 } as const
 
 export const espaciosPageTranslations = {
-  es: { badge: 'Nuestros Ambientes', idealEvents: 'Ideal Eventos', capacity: 'Capacidad', people: 'personas', bookRoom: 'Reservar en este salón' },
-  ca: { badge: 'Els Nostres Ambients', idealEvents: 'Ideal Esdeveniments', capacity: 'Capacitat', people: 'persones', bookRoom: 'Reservar en aquest saló' },
-  en: { badge: 'Our Spaces', idealEvents: 'Ideal for Events', capacity: 'Capacity', people: 'people', bookRoom: 'Book this room' },
-  fr: { badge: 'Nos Espaces', idealEvents: 'Idéal pour Événements', capacity: 'Capacité', people: 'personnes', bookRoom: 'Réserver cette salle' },
-  de: { badge: 'Unsere Räume', idealEvents: 'Ideal für Veranstaltungen', capacity: 'Kapazität', people: 'Personen', bookRoom: 'Diesen Saal buchen' },
+  es: {
+    discover: 'Descubre', title: 'Nuestros espacios', badge: 'Nuestros Ambientes', idealEvents: 'Ideal Eventos', capacity: 'Capacidad', people: 'personas', bookRoom: 'Reservar en este salón',
+    defaultName1: 'Salón Principal', defaultDesc1: 'Un ambiente sofisticado con iluminación tenue y techos altos ideal para cenas románticas o reuniones familiares de gala.',
+    defaultName2: 'Terraza Privada', defaultDesc2: 'Vistas panorámicas y brisa fresca, disfruta de una velada bajo las estrellas en un entorno moderno y relajante.',
+    defaultName3: 'The Mixology Bar', defaultDesc3: 'El corazón vibrante de Warynessy. Coctelería de autor y una selección premium de licores en un ambiente lounge chic.',
+    defaultName4: 'Cava Subterránea', defaultDesc4: 'Privacidad absoluta rodeada de las mejores etiquetas del mundo. Perfecta para catas exclusivas y eventos de negocios.',
+    climateControlled: 'Climatizado', outdoor: 'Aire Libre', fullBar: 'Barra Completa', djSet: 'DJ Set', private: 'Privado'
+  },
+
+  ca: {
+    discover: 'Descobreix', title: 'Els nostres espais', badge: 'Els Nostres Ambients', idealEvents: 'Ideal Esdeveniments', capacity: 'Capacitat', people: 'persones', bookRoom: 'Reservar en aquest saló',
+    defaultName1: 'Saló Principal', defaultDesc1: 'Un ambient sofisticat amb il·luminació tènue i sostres alts ideal per a sopars romàntics o reunions familiars de gala.',
+    defaultName2: 'Terrassa Privada', defaultDesc2: 'Vistes panoràmiques i brisa fresca, gaudeix d\'una vetllada sota les estrelles en un entorn modern i relaxant.',
+    defaultName3: 'The Mixology Bar', defaultDesc3: 'El cor vibrant de Warynessy. Cocteleria d\'autor i una selecció premium de licors en un ambient lounge chic.',
+    defaultName4: 'Celler Subterrani', defaultDesc4: 'Privacitat absoluta envoltada de les millors etiquetes del món. Perfecte per a tasts exclusius i esdeveniments de negocis.',
+    climateControlled: 'Climatitzat', outdoor: 'A l\'aire lliure', fullBar: 'Barra Completa', djSet: 'DJ Set', private: 'Privat'
+  },
+
+  en: {
+    discover: 'Discover', title: 'Our spaces', badge: 'Our Spaces', idealEvents: 'Ideal for Events', capacity: 'Capacity', people: 'people', bookRoom: 'Book this room',
+    defaultName1: 'Main Dining Hall', defaultDesc1: 'A sophisticated atmosphere with dim lighting and high ceilings, ideal for romantic dinners or gala family gatherings.',
+    defaultName2: 'Private Terrace', defaultDesc2: 'Panoramic views and fresh breeze, enjoy an evening under the stars in a modern and relaxing setting.',
+    defaultName3: 'The Mixology Bar', defaultDesc3: 'The vibrant heart of Warynessy. Signature cocktails and a premium selection of spirits in a chic lounge atmosphere.',
+    defaultName4: 'Underground Cellar', defaultDesc4: 'Absolute privacy surrounded by the world\'s finest labels. Perfect for exclusive tastings and business events.',
+    climateControlled: 'Climate Controlled', outdoor: 'Outdoor', fullBar: 'Full Bar', djSet: 'DJ Set', private: 'Private'
+  },
+
+  fr: {
+    discover: 'Découvrez', title: 'Nos espaces', badge: 'Nos Espaces', idealEvents: 'Idéal pour Événements', capacity: 'Capacité', people: 'personnes', bookRoom: 'Réserver cette salle',
+    defaultName1: 'Salle à Manger Principale', defaultDesc1: 'Une atmosphère sophistiquée avec un éclairage tamisé et de hauts plafonds, idéale pour des dîners romantiques ou des réunions de famille de gala.',
+    defaultName2: 'Terrasse Privée', defaultDesc2: 'Vues panoramiques et brise fraîche, profitez d\'une soirée sous les étoiles dans un cadre moderne et relaxant.',
+    defaultName3: 'The Mixology Bar', defaultDesc3: 'Le cœur vibrant de Warynessy. Cocktails signature et une sélection premium de spiritueux dans une atmosphère lounge chic.',
+    defaultName4: 'Cave Souterraine', defaultDesc4: 'Intimité absolue entourée des meilleures étiquettes du monde. Parfait pour des dégustations exclusives et des événements d\'affaires.',
+    climateControlled: 'Climatisé', outdoor: 'En plein air', fullBar: 'Bar Complet', djSet: 'DJ Set', private: 'Privé'
+  },
+
+  de: {
+    discover: 'Entdecken', title: 'Unsere Räume', badge: 'Unsere Räume', idealEvents: 'Ideal für Veranstaltungen', capacity: 'Kapazität', people: 'Personen', bookRoom: 'Diesen Saal buchen',
+    defaultName1: 'Hauptspeisesaal', defaultDesc1: 'Eine anspruchsvolle Atmosphäre mit gedämpftem Licht und hohen Decken, ideal für romantische Abendessen oder festliche Familienfeiern.',
+    defaultName2: 'Private Terrasse', defaultDesc2: 'Panoramablick und frische Brise, genießen Sie einen Abend unter dem Sternenhimmel in einer modernen und entspannenden Umgebung.',
+    defaultName3: 'The Mixology Bar', defaultDesc3: 'Das pulsierende Herz von Warynessy. Signature-Cocktails und eine erstklassige Auswahl an Spirituosen in einer schicken Lounge-Atmosphäre.',
+    defaultName4: 'Unterirdischer Weinkeller', defaultDesc4: 'Absolute Privatsphäre umgeben von den feinsten Etiketten der Welt. Perfekt für exklusive Verkostungen und geschäftliche Veranstaltungen.',
+    climateControlled: 'Klimatisiert', outdoor: 'Im Freien', fullBar: 'Vollständige Bar', djSet: 'DJ Set', private: 'Privat'
+  },
+
+} as const
+
+export const historiaPageTranslations = {
+  es: { badge: 'Nuestra historia', title: 'Nuestra historia', legacySubtitle: 'Un legado de sabor' },
+  ca: { badge: 'La nostra història', title: 'La nostra història', legacySubtitle: 'Un llegat de sabor' },
+  en: { badge: 'Our history', title: 'Our history', legacySubtitle: 'A legacy of flavor' },
+  fr: { badge: 'Notre histoire', title: 'Notre histoire', legacySubtitle: 'Un héritage de saveur' },
+  de: { badge: 'Unsere Geschichte', title: 'Unsere Geschichte', legacySubtitle: 'Ein Erbe des Geschmacks' },
 } as const
 
 export const contactoPageTranslations = {

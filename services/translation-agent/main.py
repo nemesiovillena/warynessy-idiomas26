@@ -27,7 +27,13 @@ async def translate_text(request: TranslationRequest):
         print("⚠️ OPENROUTER_API_KEY no encontrada. Devolviendo mock.")
         return {"translated_text": f"[{request.target_lang.upper()}] {request.text}"}
 
-    prompt = f"Traduce el siguiente texto al idioma con código ISO '{request.target_lang}'. Mantén el tono original. Solo devuelve la traducción, nada más. Si es una sola palabra o frase corta, no añadidas explicaciones:\n\n{request.text}"
+    prompt = (
+        f"You are a professional translator for a luxury restaurant website. "
+        f"Translate the following text strictly into the language with ISO code '{request.target_lang}'.\n"
+        f"IMPORTANT: Even if the text is short or a common phrase, do NOT return the original text. "
+        f"Translate it accurately. Maintain the tone. Output ONLY the translated text, no explanations.\n"
+        f"Text to translate: {request.text}"
+    )
 
     try:
         response = requests.post(

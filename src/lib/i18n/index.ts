@@ -12,6 +12,7 @@ export {
   espaciosPageTranslations,
   contactoPageTranslations,
   menuSlugTranslations,
+  historiaPageTranslations,
 } from './page-translations'
 export { homeTranslations } from './home-translations'
 
@@ -32,6 +33,7 @@ import {
   espaciosPageTranslations,
   contactoPageTranslations,
   menuSlugTranslations,
+  historiaPageTranslations,
 } from './page-translations'
 
 // Composite translations object — typed from the Spanish (default) locale
@@ -47,6 +49,7 @@ const translations = {
     espacios: espaciosPageTranslations.es,
     contacto: contactoPageTranslations.es,
     menuSlug: menuSlugTranslations.es,
+    historia: historiaPageTranslations.es,
   },
   ca: {
     home: homeTranslations.ca,
@@ -59,6 +62,7 @@ const translations = {
     espacios: espaciosPageTranslations.ca,
     contacto: contactoPageTranslations.ca,
     menuSlug: menuSlugTranslations.ca,
+    historia: historiaPageTranslations.ca,
   },
   en: {
     home: homeTranslations.en,
@@ -71,6 +75,7 @@ const translations = {
     espacios: espaciosPageTranslations.en,
     contacto: contactoPageTranslations.en,
     menuSlug: menuSlugTranslations.en,
+    historia: historiaPageTranslations.en,
   },
   fr: {
     home: homeTranslations.fr,
@@ -83,6 +88,7 @@ const translations = {
     espacios: espaciosPageTranslations.fr,
     contacto: contactoPageTranslations.fr,
     menuSlug: menuSlugTranslations.fr,
+    historia: historiaPageTranslations.fr,
   },
   de: {
     home: homeTranslations.de,
@@ -95,6 +101,7 @@ const translations = {
     espacios: espaciosPageTranslations.de,
     contacto: contactoPageTranslations.de,
     menuSlug: menuSlugTranslations.de,
+    historia: historiaPageTranslations.de,
   },
 }
 

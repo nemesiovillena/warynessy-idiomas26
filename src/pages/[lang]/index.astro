@@ -52,7 +52,8 @@ const _t = {
     viewInstagram: "Ver Instagram",
     loadingInstagram: "Cargando feed de Instagram...",
     restaurantInterior: "Interior del restaurante",
-    restaurantSpace: "Espacio del restaurante"
+    restaurantSpace: "Espacio del restaurante",
+    storyButton: "Conoce nuestra historia"
   },
   ca: {
     schedule: "Horari",
@@ -76,7 +77,8 @@ const _t = {
     viewInstagram: "Veure Instagram",
     loadingInstagram: "Carregant feed d'Instagram...",
     restaurantInterior: "Interior del restaurant",
-    restaurantSpace: "Espai del restaurant"
+    restaurantSpace: "Espai del restaurant",
+    storyButton: "Coneix la nostra història"
   },
   en: {
     schedule: "Opening Hours",
@@ -100,7 +102,8 @@ const _t = {
     viewInstagram: "View Instagram",
     loadingInstagram: "Loading Instagram feed...",
     restaurantInterior: "Restaurant interior",
-    restaurantSpace: "Restaurant space"
+    restaurantSpace: "Restaurant space",
+    storyButton: "Our story"
   },
   fr: {
     schedule: "Horaires",
@@ -124,7 +127,8 @@ const _t = {
     viewInstagram: "Voir Instagram",
     loadingInstagram: "Chargement du flux Instagram...",
     restaurantInterior: "Intérieur du restaurant",
-    restaurantSpace: "Espace du restaurant"
+    restaurantSpace: "Espace du restaurant",
+    storyButton: "Notre histoire"
   },
   de: {
     schedule: "Öffnungszeiten",
@@ -148,7 +152,8 @@ const _t = {
     viewInstagram: "Instagram ansehen",
     loadingInstagram: "Instagram-Feed wird geladen...",
     restaurantInterior: "Innenraum des Restaurants",
-    restaurantSpace: "Restaurantbereich"
+    restaurantSpace: "Restaurantbereich",
+    storyButton: "Unsere Geschichte"
   }
 };
 const ui = _t[locale as keyof typeof _t] || _t.es;
@@ -160,7 +165,7 @@ const ui = _t[locale as keyof typeof _t] || _t.es;
   <section class="relative h-screen w-full overflow-hidden group">
     <div
       class="absolute inset-0 fixed-bg"
-      style={`background-image: url('${typeof homepage?.heroImage === 'object' ? (homepage.heroImage.filename ? `https://warynessy.b-cdn.net/${homepage.heroImage.filename}` : homepage.heroImage.url) : 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80'}');`}
+      style={`background-image: url('${getOptimizedImageUrl(typeof homepage?.heroImage === 'object' ? homepage.heroImage?.url : '') || 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80'}');`}
     >
     </div>
     <div class="absolute inset-0 hero-content-gradient"></div>
@@ -204,19 +209,17 @@ const ui = _t[locale as keyof typeof _t] || _t.es;
             : ui.storyText
           }
         </div>
-        {/* 
         <div class="mt-4">
           <Button href={`/${locale}/historia`} variant="outline" class="border-white/20 text-white hover:bg-white hover:text-black transition-all group">
-            Conoce nuestra historia
+            {ui.storyButton}
             <span class="material-symbols-outlined ml-2 transition-transform group-hover:translate-x-1">arrow_right_alt</span>
           </Button>
         </div>
-        */}
       </div>
       <div class="grid grid-cols-2 gap-6 order-1 lg:order-2 animate-stagger-container">
         {homepage?.galeriaInicio?.slice(0, 2).map((img: any, i: number) => (
           <ResponsiveImage
-            src={typeof img.imagen === 'object' ? (img.imagen?.filename ? `https://warynessy.b-cdn.net/${img.imagen.filename}` : img.imagen?.url) : ''}
+            src={getOptimizedImageUrl(img.imagen?.url)}
             alt={ui.restaurantInterior}
             class={`rounded-2xl shadow-2xl ${i === 1 ? 'mt-12' : ''} animate-stagger-item`}
             aspectRatio="3/4"
@@ -271,7 +274,7 @@ const ui = _t[locale as keyof typeof _t] || _t.es;
     <div class="absolute inset-0 z-0 grid grid-cols-2 md:grid-cols-4 grayscale-[30%] opacity-80 group-hover:grayscale-0 transition-all duration-[2s]">
       {homepage?.galeriaRegalo && homepage.galeriaRegalo.length > 0 ? (
         homepage.galeriaRegalo.map((item: any) => {
-          const imgUrl = typeof item.imagen === 'object' ? (item.imagen?.filename ? `https://warynessy.b-cdn.net/${item.imagen.filename}` : item.imagen?.url) : '';
+          const imgUrl = getOptimizedImageUrl(item.imagen?.url);
           return (
             <div class="relative h-full w-full">
               {imgUrl ? (
@@ -348,8 +351,8 @@ const ui = _t[locale as keyof typeof _t] || _t.es;
           return (
             <div class={`animate-stagger-item ${gridClasses} overflow-hidden rounded-2xl group relative shadow-xl`}>
               <ResponsiveImage
-                src={typeof img.imagen === 'object' ? (img.imagen?.filename ? `https://warynessy.b-cdn.net/${img.imagen.filename}` : img.imagen?.url) : ''}
-                alt={typeof img.imagen === 'object' && img.imagen?.alt ? img.imagen.alt : ui.restaurantSpace}
+              src={getOptimizedImageUrl(img.imagen?.url)}
+              alt={typeof img.imagen === 'object' && img.imagen?.alt ? img.imagen.alt : ui.restaurantSpace}
                 class="h-full w-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
               />
               <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700"></div>

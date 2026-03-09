@@ -21,8 +21,9 @@ export const Paginas: CollectionConfig = {
     hooks: {
         afterChange: [
             async ({ doc, previousDoc, operation, req }) => {
-                const _locale = (req as any).locale;
-                if (_locale && _locale !== 'es') return;
+                const _locale = (req as any).locale || 'es';
+                console.log(`[PAGINAS] afterChange hook ejecutado. Operación: ${operation}, Locale: ${_locale}, ID: ${doc.id}`);
+                if (_locale !== 'es') return;
                 if (operation === 'create' || operation === 'update') {
                     const payload = req.payload;
                     const executeTranslations = async () => {
@@ -36,7 +37,7 @@ export const Paginas: CollectionConfig = {
                             const modelo = configTraduccion?.modeloIA || 'google/gemini-2.0-flash-001';
 
                             const targetLocales = ['ca', 'en', 'fr', 'de'] as const;
-                            const fieldsToTranslate = ['titulo', 'descripcion', 'slug_es_manual', 'slug_ca_manual', 'slug_en_manual', 'slug_fr_manual', 'slug_de_manual', 'hero', 'layout'];
+                            const fieldsToTranslate = ['heroTitle', 'heroSubtitle', 'historiaMision', 'historiaHitos', 'nombreEspacio1', 'descripcionEspacio1', 'nombreEspacio2', 'descripcionEspacio2', 'nombreEspacio3', 'descripcionEspacio3', 'nombreEspacio4', 'descripcionEspacio4', 'metaTitle', 'metaDescription'];
 
                             console.log(`[PAGINAS] [Background] Iniciando traducciones para ID: ${doc.id}`);
 
@@ -51,15 +52,21 @@ export const Paginas: CollectionConfig = {
                                     operation
                                 });
 
+                                // Limpiar campos del sistema que no deben actualizarse
+                                const { id: _id, updatedAt: _ua, createdAt: _ca, ...cleanTranslatedData } = translatedData as any;
+
                                 if (hasTranslations) {
                                     console.log(`[PAGINAS] [Background] Aplicando traducciones a locale ${locale} para ID: ${doc.id}...`);
+                                    console.log(`[PAGINAS] [DEBUG] Data para ${locale}: ${JSON.stringify(cleanTranslatedData).substring(0, 500)}...`);
                                     await req.payload.update({
                                         collection: 'paginas',
                                         id: doc.id,
                                         locale: locale as any,
-                                        data: translatedData,
+                                        data: cleanTranslatedData,
                                         req: { payload: req.payload, disableHooks: true } as any,
                                     });
+                                } else {
+                                    console.log(`[PAGINAS] [Background] No se obtuvieron traducciones reales para locale ${locale} (ID: ${doc.id}).`);
                                 }
                             }
                             console.log(`[PAGINAS] [Background] Traducciones completadas para ID: ${doc.id}.`);
@@ -140,6 +147,26 @@ export const Paginas: CollectionConfig = {
                                     },
                                 },
                                 {
+                                    name: 'nombreEspacio1',
+                                    type: 'text',
+                                    label: 'Nombre Espacio 1',
+                                    localized: true,
+                                    admin: {
+                                        width: '50%',
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            name: 'descripcionEspacio1',
+                            type: 'textarea',
+                            label: 'Descripción Espacio 1',
+                            localized: true,
+                        },
+                        {
+                            type: 'row',
+                            fields: [
+                                {
                                     name: 'imagenEspacio2',
                                     type: 'upload',
                                     label: 'Imagen 2 (Superior derecha)',
@@ -148,7 +175,22 @@ export const Paginas: CollectionConfig = {
                                         width: '50%',
                                     },
                                 },
+                                {
+                                    name: 'nombreEspacio2',
+                                    type: 'text',
+                                    label: 'Nombre Espacio 2',
+                                    localized: true,
+                                    admin: {
+                                        width: '50%',
+                                    },
+                                },
                             ],
+                        },
+                        {
+                            name: 'descripcionEspacio2',
+                            type: 'textarea',
+                            label: 'Descripción Espacio 2',
+                            localized: true,
                         },
                         {
                             type: 'row',
@@ -163,6 +205,26 @@ export const Paginas: CollectionConfig = {
                                     },
                                 },
                                 {
+                                    name: 'nombreEspacio3',
+                                    type: 'text',
+                                    label: 'Nombre Espacio 3',
+                                    localized: true,
+                                    admin: {
+                                        width: '50%',
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            name: 'descripcionEspacio3',
+                            type: 'textarea',
+                            label: 'Descripción Espacio 3',
+                            localized: true,
+                        },
+                        {
+                            type: 'row',
+                            fields: [
+                                {
                                     name: 'imagenEspacio4',
                                     type: 'upload',
                                     label: 'Imagen 4 (Inferior derecha)',
@@ -171,7 +233,22 @@ export const Paginas: CollectionConfig = {
                                         width: '50%',
                                     },
                                 },
+                                {
+                                    name: 'nombreEspacio4',
+                                    type: 'text',
+                                    label: 'Nombre Espacio 4',
+                                    localized: true,
+                                    admin: {
+                                        width: '50%',
+                                    },
+                                },
                             ],
+                        },
+                        {
+                            name: 'descripcionEspacio4',
+                            type: 'textarea',
+                            label: 'Descripción Espacio 4',
+                            localized: true,
                         },
                     ],
                 },
@@ -194,19 +271,18 @@ export const Paginas: CollectionConfig = {
                             name: 'historiaHitos',
                             type: 'array',
                             label: 'Hitos Históricos',
+                            localized: true,
                             fields: [
                                 {
                                     name: 'titulo',
                                     type: 'text',
                                     label: 'Título del Hito (ej: Los Inicios)',
-                                    required: true,
                                     localized: true,
                                 },
                                 {
                                     name: 'descripcion',
                                     type: 'textarea',
                                     label: 'Descripción del Hito',
-                                    required: true,
                                     localized: true,
                                 },
                                 {
