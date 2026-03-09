@@ -1,17 +1,18 @@
 import type { APIRoute } from 'astro';
 import { Resend } from 'resend';
 import { getSiteSettings } from '../../lib/payload-local';
-import DOMPurify from 'dompurify';
 
 export const prerender = false;
 
-// Función para sanitizar inputs y prevenir XSS
+// Escapa caracteres HTML para prevenir XSS en el cuerpo del email
 const sanitizeInput = (input: string): string => {
   if (!input) return '';
-  return DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: [], // No permitir ningún tag HTML
-    ALLOWED_ATTR: [] // No permitir ningún atributo
-  });
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
 };
 
 export const POST: APIRoute = async ({ request }) => {
