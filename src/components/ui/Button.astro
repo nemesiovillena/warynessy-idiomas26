@@ -8,19 +8,21 @@ interface Props {
   target?: string;
   rel?: string;
   disabled?: boolean;
+  download?: string | boolean;
   trackEvent?: string;
   trackCategory?: string;
 }
 
-const { 
-  href, 
-  variant = 'primary', 
-  size = 'md', 
-  class: className = '', 
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  class: className = '',
   type = 'button',
   target,
   rel,
   disabled = false,
+  download,
   trackEvent,
   trackCategory
 } = Astro.props;
@@ -51,11 +53,12 @@ const classes = [
 
 {
   href ? (
-    <a 
-      href={href} 
-      class={classes} 
-      target={target} 
+    <a
+      href={href}
+      class={classes}
+      target={target}
       rel={rel}
+      download={download}
       data-track={trackEvent}
       data-track-category={trackCategory}
     >
