@@ -23,7 +23,7 @@ try {
   [siteSettings, menus, menusGrupo, pageData] = await Promise.all([
     getSiteSettings(locale),
     getMenus(true, locale),
-    getMenusGrupo(locale),
+    getMenusGrupo(true, locale),
     getPaginaBySlug('menus', locale)
   ]);
 } catch (error) {
