@@ -51,19 +51,22 @@ const heroImg = getOptimizedImageUrl(rawHeroImg);
   </section>
 
   <Section class="bg-matte-black pt-0">
-    <Container class="w-full max-w-4xl -mt-4 md:-mt-8">
-      <div class="bg-matte-black rounded-2xl overflow-hidden shadow-2xl border border-white/5">
-        <div id="covermanager-widget" class="w-full overflow-hidden">
+    <Container class="w-full max-w-2xl -mt-4 md:-mt-8">
+      <div class="bg-matte-black rounded-2xl overflow-visible shadow-2xl border border-white/5">
+        <div id="covermanager-widget" class="w-full overflow-visible">
            <script is:inline src="https://www.covermanager.com/js/iframeResizer.min.js"></script>
            <iframe
              src={`https://www.covermanager.com/reservation/module_restaurant/restaurante-warynessy/${covermanagerLang}`}
-             style="width: 100%; min-height: 950px; max-width: 100%; border: none;"
+             style="width: 100%; min-height: 700px; max-width: 100%; border: none; display: block;"
              id="restaurante-warynessy"
              title="Reservas"
              allow="payment"
-             scrolling="auto"
+             scrolling="no"
            ></iframe>
            <script is:inline>
+             // Guardar la altura máxima alcanzada para que el iframe nunca encoja entre pasos
+             var _cmMaxHeight = 700;
+
              function initReservasIframeResize() {
                if (typeof iFrameResize === 'function') {
                  iFrameResize({
@@ -71,7 +74,17 @@ const heroImg = getOptimizedImageUrl(rawHeroImg);
                    checkOrigin: false,
                    scrolling: false,
                    heightCalculationMethod: 'lowestElement',
-                   tolerance: 0
+                   tolerance: 20,
+                   onResized: function(data) {
+                     var iframe = document.getElementById('restaurante-warynessy');
+                     if (!iframe) return;
+                     var newHeight = parseInt(data.height, 10);
+                     if (newHeight > _cmMaxHeight) {
+                       _cmMaxHeight = newHeight;
+                     }
+                     // Nunca encoger por debajo de la altura máxima vista
+                     iframe.style.minHeight = _cmMaxHeight + 'px';
+                   }
                  }, '#restaurante-warynessy');
                }
              }
