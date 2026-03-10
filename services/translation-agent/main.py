@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import requests
 from dotenv import load_dotenv
 
-load_dotenv(os.path.join(os.path.dirname(__file__), '../../.env'))
+load_dotenv()  # Solo carga .env si existe (desarrollo local), en producción usa variables de entorno del sistema
 
 app = FastAPI(title="Warynessy Translation Agent")
 
