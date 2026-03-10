@@ -65,7 +65,9 @@ export async function callTranslationAgent(
     if (!text || typeof text !== 'string' || text.trim().length === 0) return text;
 
     const resolvedModel = model || 'gemini-2.0-flash';
-    const resolvedProveedor = proveedor || 'gemini-api';
+    // En producción, forzar siempre gemini-api (agente-python no está disponible en Docker)
+    const isProduction = process.env.NODE_ENV === 'production';
+    const resolvedProveedor = (isProduction && proveedor === 'agente-python') ? 'gemini-api' : (proveedor || 'gemini-api');
 
     console.log(`[Translation] Traduciendo a '${targetLang}' via '${resolvedProveedor}' (${resolvedModel})...`);
 
