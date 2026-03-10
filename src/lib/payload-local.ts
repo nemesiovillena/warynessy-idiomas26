@@ -1,12 +1,10 @@
 // Cliente REST de Payload para Astro
 // Usa la API REST de Payload en lugar de la API local para evitar conflictos de inicialización
 
-// Usar process.env para SSR en Astro
-const API_URL = process.env.PUBLIC_PAYLOAD_API_URL
-  || (process.env.PAYLOAD_PUBLIC_SERVER_URL ? `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api` : null)
-  || 'http://localhost:3000/api'
+// En SSR siempre usar localhost para evitar loop Traefik → contenedor → Traefik
+// La URL pública (PUBLIC_PAYLOAD_API_URL) solo aplica en el cliente (browser)
+const API_URL = 'http://localhost:3000/api'
 
-console.log('[payload-local] API_URL:', API_URL)
 
 interface PayloadResponse<T> {
   docs: T[]
