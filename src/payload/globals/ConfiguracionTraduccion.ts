@@ -11,7 +11,6 @@ export const ConfiguracionTraduccion: GlobalConfig = {
             name: 'proveedorIA',
             type: 'select',
             label: 'Proveedor de Traducción',
-            required: true,
             defaultValue: 'gemini-api',
             options: [
                 { label: 'Google Gemini API (Directo) — Recomendado para producción', value: 'gemini-api' },
@@ -25,7 +24,6 @@ export const ConfiguracionTraduccion: GlobalConfig = {
             name: 'modeloIA',
             type: 'select',
             label: 'Modelo de Traducción',
-            required: true,
             defaultValue: 'gemini-2.0-flash',
             options: [
                 // Modelos Gemini API directa
