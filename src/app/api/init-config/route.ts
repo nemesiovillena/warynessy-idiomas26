@@ -48,25 +48,16 @@ export async function GET(req: Request) {
         const count = parseInt(countRes.rows[0].count)
         dbLog.push(`Row count: ${count}`)
 
-        if (count === 0) {
-            await pool.query(`
-                INSERT INTO "configuracion_traduccion" ("proveedor_i_a", "modelo_i_a", "endpoint_agente")
-                VALUES ('gemini-api', 'gemini-2.0-flash', 'http://localhost:8000/translate');
-            `)
-            dbLog.push('Default row inserted.')
-        } else {
-            // Actualizar el registro existente
-            await pool.query(`
-                UPDATE "configuracion_traduccion"
-                SET "proveedor_i_a" = 'gemini-api', "modelo_i_a" = 'gemini-2.0-flash', "updated_at" = now()
-                WHERE id = (SELECT id FROM "configuracion_traduccion" ORDER BY id LIMIT 1);
-            `)
-            dbLog.push('Existing row updated to gemini-api.')
-        }
+        // Leer las columnas reales de la tabla
+        const colsRes = await pool.query(`
+            SELECT column_name, data_type FROM information_schema.columns
+            WHERE table_name = 'configuracion_traduccion' ORDER BY ordinal_position;
+        `)
+        dbLog.push(`Columns: ${JSON.stringify(colsRes.rows)}`)
 
-        // Leer el resultado final
+        // Leer el registro existente
         const finalRow = await pool.query(`SELECT * FROM "configuracion_traduccion" ORDER BY id LIMIT 1;`)
-        dbLog.push(`Final row: ${JSON.stringify(finalRow.rows[0])}`)
+        dbLog.push(`Current row: ${JSON.stringify(finalRow.rows[0])}`)
     } catch (e: any) {
         dbLog.push(`DB error: ${e.message}`)
     } finally {
