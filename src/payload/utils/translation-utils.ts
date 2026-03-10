@@ -18,7 +18,7 @@ export interface TranslationResponse {
  */
 export const translatingIds = new Set<string>();
 
-const AGENT_TIMEOUT_MS = 15_000;
+const AGENT_TIMEOUT_MS = 30_000;
 
 /**
  * Realiza una petición al agente Python (FastAPI) con timeout.
