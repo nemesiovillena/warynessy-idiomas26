@@ -32,6 +32,10 @@ export async function translateWithGemini(
         return text
     }
 
+    // Normalizar nombre del modelo: eliminar prefijos tipo "google/" o "anthropic/"
+    // La API de Gemini solo acepta el nombre corto, ej: "gemini-2.0-flash"
+    const normalizedModel = model.includes('/') ? model.split('/').pop()! : model
+
     const targetLanguage = LANGUAGE_NAMES[targetLang] || targetLang
     const prompt = `Translate the following text to ${targetLanguage}. Return ONLY the translated text, no explanations, no quotes, no extra formatting.\n\nText to translate:\n${text}`
 
@@ -39,7 +43,7 @@ export async function translateWithGemini(
     const timer = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS)
 
     try {
-        const url = `${GEMINI_API_BASE}/${model}:generateContent?key=${apiKey}`
+        const url = `${GEMINI_API_BASE}/${normalizedModel}:generateContent?key=${apiKey}`
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -66,7 +70,7 @@ export async function translateWithGemini(
             return text
         }
 
-        console.log(`[Gemini] Traducción a '${targetLang}' completada (${model})`)
+        console.log(`[Gemini] Traducción a '${targetLang}' completada (${normalizedModel})`)
         return translated
     } catch (error: any) {
         if (error?.name === 'AbortError') {
