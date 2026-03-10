@@ -1,11 +1,13 @@
 import { getPayload } from 'payload'
 import config from '../../../../payload.config'
 import { NextResponse } from 'next/server'
+import pg from 'pg'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * Endpoint temporal para diagnosticar y arreglar el global configuracion-traduccion.
+ * Endpoint para crear la tabla configuracion_traduccion si no existe
+ * y luego inicializar el global via Payload.
  * Uso: GET /api/init-config?secret=<PAYLOAD_SECRET>
  */
 export async function GET(req: Request) {
@@ -16,41 +18,70 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const dbLog: string[] = []
+
+    // Paso 1: Crear la tabla directamente con pg si no existe
+    const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+    try {
+        const tableCheck = await pool.query(`
+            SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'configuracion_traduccion');
+        `)
+        const tableExists = tableCheck.rows[0].exists
+        dbLog.push(`Table exists: ${tableExists}`)
+
+        if (!tableExists) {
+            await pool.query(`
+                CREATE TABLE "configuracion_traduccion" (
+                    "id" serial PRIMARY KEY,
+                    "proveedor_i_a" varchar DEFAULT 'gemini-api',
+                    "modelo_i_a" varchar DEFAULT 'gemini-2.0-flash',
+                    "endpoint_agente" varchar DEFAULT 'http://localhost:8000/translate',
+                    "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+                    "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+                );
+            `)
+            dbLog.push('Table created.')
+        }
+
+        // Asegurar que hay al menos un registro
+        const countRes = await pool.query(`SELECT COUNT(*) FROM "configuracion_traduccion";`)
+        const count = parseInt(countRes.rows[0].count)
+        dbLog.push(`Row count: ${count}`)
+
+        if (count === 0) {
+            await pool.query(`
+                INSERT INTO "configuracion_traduccion" ("proveedor_i_a", "modelo_i_a", "endpoint_agente")
+                VALUES ('gemini-api', 'gemini-2.0-flash', 'http://localhost:8000/translate');
+            `)
+            dbLog.push('Default row inserted.')
+        } else {
+            // Actualizar el registro existente
+            await pool.query(`
+                UPDATE "configuracion_traduccion"
+                SET "proveedor_i_a" = 'gemini-api', "modelo_i_a" = 'gemini-2.0-flash', "updated_at" = now()
+                WHERE id = (SELECT id FROM "configuracion_traduccion" ORDER BY id LIMIT 1);
+            `)
+            dbLog.push('Existing row updated to gemini-api.')
+        }
+
+        // Leer el resultado final
+        const finalRow = await pool.query(`SELECT * FROM "configuracion_traduccion" ORDER BY id LIMIT 1;`)
+        dbLog.push(`Final row: ${JSON.stringify(finalRow.rows[0])}`)
+    } catch (e: any) {
+        dbLog.push(`DB error: ${e.message}`)
+    } finally {
+        await pool.end()
+    }
+
+    // Paso 2: Verificar via Payload
+    let payloadRead: any = null
+    let payloadError: string | null = null
     try {
         const payload = await getPayload({ config })
-
-        // Intentar leer el global
-        let current: any = null
-        let readError: string | null = null
-        try {
-            current = await payload.findGlobal({ slug: 'configuracion-traduccion' as any })
-        } catch (e: any) {
-            readError = e.message
-        }
-
-        // Intentar actualizar/crear con valores correctos
-        let updateResult: any = null
-        let updateError: string | null = null
-        try {
-            updateResult = await payload.updateGlobal({
-                slug: 'configuracion-traduccion' as any,
-                data: {
-                    proveedorIA: 'gemini-api',
-                    modeloIA: 'gemini-2.0-flash',
-                    endpointAgente: 'http://localhost:8000/translate',
-                } as any,
-            })
-        } catch (e: any) {
-            updateError = e.message
-        }
-
-        return NextResponse.json({
-            readBefore: current,
-            readError,
-            updateResult,
-            updateError,
-        })
+        payloadRead = await payload.findGlobal({ slug: 'configuracion-traduccion' as any })
     } catch (e: any) {
-        return NextResponse.json({ fatalError: e.message, stack: e.stack }, { status: 500 })
+        payloadError = e.message
     }
+
+    return NextResponse.json({ dbLog, payloadRead, payloadError })
 }
