@@ -1,6 +1,7 @@
 import { getPayload } from 'payload'
 import config from '../../../../payload.config'
 import { NextResponse } from 'next/server'
+import { translatingIds } from '../../../payload/utils/translation-utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,6 +37,9 @@ export async function GET(req: Request) {
 
         console.log('[Bulk-Translation] Iniciando proceso masivo...')
 
+        // Delay entre documentos para no saturar el agente de traducción
+        const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
         // --- Traducir Colecciones ---
         for (const collection of collections) {
             const { docs } = await payload.find({
@@ -49,6 +53,10 @@ export async function GET(req: Request) {
 
             for (const doc of docs) {
                 try {
+                    // Esperar si este doc ya está siendo traducido
+                    while (translatingIds.has(doc.id)) {
+                        await sleep(500)
+                    }
                     // Realizar una actualización que dispare el afterChange hook
                     await payload.update({
                         collection: collection as any,
