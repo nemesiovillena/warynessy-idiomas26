@@ -159,8 +159,37 @@ async function runDatabaseHotfix() {
     }
 
     // ========================================
-    // 3. Fix relation columns in other tables
+    // 3. Crear tabla configuracion_traduccion si no existe
     // ========================================
+    const configTraduccionExists = await pool.query(`
+      SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'configuracion_traduccion');
+    `)
+    if (!configTraduccionExists.rows[0].exists) {
+      console.log('➕ Creating configuracion_traduccion table...')
+      await pool.query(`
+        CREATE TABLE "configuracion_traduccion" (
+          "id" serial PRIMARY KEY,
+          "proveedor_i_a" varchar DEFAULT 'gemini-api',
+          "modelo_i_a" varchar DEFAULT 'gemini-2.0-flash',
+          "endpoint_agente" varchar DEFAULT 'http://localhost:8000/translate',
+          "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+        );
+      `)
+      // Insertar registro inicial con valores por defecto
+      await pool.query(`
+        INSERT INTO "configuracion_traduccion" ("proveedor_i_a", "modelo_i_a", "endpoint_agente")
+        VALUES ('gemini-api', 'gemini-2.0-flash', 'http://localhost:8000/translate');
+      `)
+      console.log('✅ configuracion_traduccion table created with default values.')
+    } else {
+      // Asegurar que el registro por defecto existe
+      await pool.query(`
+        INSERT INTO "configuracion_traduccion" ("proveedor_i_a", "modelo_i_a", "endpoint_agente")
+        SELECT 'gemini-api', 'gemini-2.0-flash', 'http://localhost:8000/translate'
+        WHERE NOT EXISTS (SELECT 1 FROM "configuracion_traduccion");
+      `)
+    }
 
     // ========================================
     // 4. Crear tabla backup_deltas si no existe
