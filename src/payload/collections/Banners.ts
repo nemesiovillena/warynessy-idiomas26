@@ -36,7 +36,8 @@ export const Banners: CollectionConfig = {
                 slug: 'configuracion-traduccion' as any,
               })
               const endpoint = configTraduccion?.endpointAgente || 'http://localhost:8000/translate'
-              const modelo = configTraduccion?.modeloIA || 'google/gemini-2.0-flash-001'
+              const modelo = configTraduccion?.modeloIA || 'gemini-2.0-flash'
+              const proveedor = configTraduccion?.proveedorIA || 'gemini-api'
 
               const targetLocales = ['ca', 'en', 'fr', 'de'] as const
               const fieldsToTranslate = ['titulo', 'subtitulo', 'ctaText'] // Corregido nombres de campos según fields real
@@ -51,6 +52,7 @@ export const Banners: CollectionConfig = {
                   targetLang: locale,
                   endpoint,
                   model: modelo,
+                  proveedor,
                   operation,
                 })
 
@@ -58,7 +60,7 @@ export const Banners: CollectionConfig = {
                   // También traducir el texto del enlace si existe
                   if (doc.link?.texto && doc.link.texto !== previousDoc?.link?.texto) {
                     console.log(`[BANNERS] [Background] Traduciendo texto del enlace al locale ${locale}...`)
-                    const translatedLinkText = await callTranslationAgent(doc.link.texto, locale, endpoint, modelo);
+                    const translatedLinkText = await callTranslationAgent(doc.link.texto, locale, endpoint, modelo, proveedor);
                     translatedData.link = {
                       ...doc.link,
                       texto: translatedLinkText

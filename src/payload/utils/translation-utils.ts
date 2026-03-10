@@ -1,6 +1,11 @@
 /**
- * Utilidades para la traducción automática en Payload CMS
+ * Utilidades para la traducción automática en Payload CMS.
+ * Soporta dos proveedores:
+ *   - 'gemini-api': Llama directamente a Google Gemini API (producción)
+ *   - 'agente-python': Llama al servicio FastAPI local (desarrollo)
  */
+
+import { translateWithGemini } from './gemini-translation-client';
 
 export interface TranslationResponse {
     translated_text: string;
@@ -13,19 +18,19 @@ export interface TranslationResponse {
  */
 export const translatingIds = new Set<string>();
 
-const TRANSLATION_TIMEOUT_MS = 15_000;
+const AGENT_TIMEOUT_MS = 15_000;
 
 /**
- * Realiza una petición de traducción con timeout y un reintento en caso de error de red.
+ * Realiza una petición al agente Python (FastAPI) con timeout.
  */
-async function fetchTranslation(
+async function fetchFromPythonAgent(
     text: string,
     targetLang: string,
     endpoint: string,
     model: string
 ): Promise<string> {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TRANSLATION_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), AGENT_TIMEOUT_MS);
 
     try {
         const res = await fetch(endpoint, {
@@ -39,7 +44,7 @@ async function fetchTranslation(
             const data: TranslationResponse = await res.json();
             return data.translated_text;
         }
-        console.error(`[Translation] Error del agente para '${targetLang}' (${res.status}):`, await res.text());
+        console.error(`[AgentePython] Error para '${targetLang}' (${res.status}):`, await res.text());
         return text;
     } finally {
         clearTimeout(timer);
@@ -47,32 +52,40 @@ async function fetchTranslation(
 }
 
 /**
- * Llama al agente de traducción Python con timeout (15s) y un reintento en fallos de red.
+ * Punto de entrada único para traducción de texto.
+ * Enruta al proveedor correcto según configuración.
  */
 export async function callTranslationAgent(
     text: string,
     targetLang: string,
     endpoint: string,
-    model?: string
+    model?: string,
+    proveedor?: string
 ): Promise<string> {
     if (!text || typeof text !== 'string' || text.trim().length === 0) return text;
 
-    const resolvedModel = model || 'google/gemini-2.0-flash-001';
-    console.log(`[Translation] Solicitando traducción a '${targetLang}'...`);
+    const resolvedModel = model || 'gemini-2.0-flash';
+    const resolvedProveedor = proveedor || 'gemini-api';
 
+    console.log(`[Translation] Traduciendo a '${targetLang}' via '${resolvedProveedor}' (${resolvedModel})...`);
+
+    // Proveedor: Google Gemini API directa
+    if (resolvedProveedor === 'gemini-api') {
+        return translateWithGemini(text, targetLang, resolvedModel);
+    }
+
+    // Proveedor: Agente Python (con reintento en fallos de red)
     try {
-        const result = await fetchTranslation(text, targetLang, endpoint, resolvedModel);
-        console.log(`[Translation] Éxito: traducción a '${targetLang}' recibida.`);
+        const result = await fetchFromPythonAgent(text, targetLang, endpoint, resolvedModel);
+        console.log(`[Translation] Éxito via agente Python para '${targetLang}'.`);
         return result;
     } catch (firstError) {
-        console.warn(`[Translation] Primer intento fallido para '${targetLang}', reintentando...`, firstError);
+        console.warn(`[Translation] Primer intento fallido, reintentando...`, firstError);
         try {
-            const result = await fetchTranslation(text, targetLang, endpoint, resolvedModel);
-            console.log(`[Translation] Éxito en reintento: traducción a '${targetLang}' recibida.`);
-            return result;
+            return await fetchFromPythonAgent(text, targetLang, endpoint, resolvedModel);
         } catch (retryError) {
-            console.error(`[Translation] Error de red hacia '${targetLang}' tras reintento:`, retryError);
-            return text; // Fallback al original
+            console.error(`[Translation] Error tras reintento para '${targetLang}':`, retryError);
+            return text;
         }
     }
 }
@@ -84,7 +97,8 @@ export async function translateLexical(
     lexicalObj: any,
     targetLang: string,
     endpoint: string,
-    model?: string
+    model?: string,
+    proveedor?: string
 ): Promise<any> {
     if (!lexicalObj || typeof lexicalObj !== 'object') return lexicalObj;
 
@@ -95,7 +109,7 @@ export async function translateLexical(
         // Procesar nodos secuencialmente para evitar saturar el agente
         for (const node of nodes) {
             if (node.text && typeof node.text === 'string' && node.text.trim().length > 0) {
-                node.text = await callTranslationAgent(node.text, targetLang, endpoint, model);
+                node.text = await callTranslationAgent(node.text, targetLang, endpoint, model, proveedor);
             }
             if (node.children && Array.isArray(node.children)) {
                 await traverseNodes(node.children);
@@ -120,6 +134,7 @@ export async function translateDocument({
     targetLang,
     endpoint,
     model,
+    proveedor,
     operation
 }: {
     doc: any;
@@ -128,6 +143,7 @@ export async function translateDocument({
     targetLang: string;
     endpoint: string;
     model?: string;
+    proveedor?: string;
     operation: 'create' | 'update';
 }): Promise<{ translatedData: any; hasTranslations: boolean }> {
     const translatedData: any = {};
@@ -166,7 +182,7 @@ export async function translateDocument({
             // Caso 1: RichText (Lexical)
             if (typeof value === 'object' && value !== null && value.root) {
                 console.log(`[TranslateTool] Traduciendo RichText: ${field} al locale ${targetLang}...`);
-                translatedData[field] = await translateLexical(value, targetLang, endpoint, model);
+                translatedData[field] = await translateLexical(value, targetLang, endpoint, model, proveedor);
                 hasTranslations = true;
             }
             // Caso 2: Arrays
@@ -194,7 +210,7 @@ export async function translateDocument({
                                     continue;
                                 }
 
-                                translatedItem[subKey] = await callTranslationAgent(item[subKey], targetLang, endpoint, model);
+                                translatedItem[subKey] = await callTranslationAgent(item[subKey], targetLang, endpoint, model, proveedor);
                             } else {
                                 translatedItem[subKey] = extractId(item[subKey]);
                             }
@@ -206,7 +222,7 @@ export async function translateDocument({
                             translatedArray.push(item);
                             continue;
                         }
-                        translatedArray.push(await callTranslationAgent(item, targetLang, endpoint, model));
+                        translatedArray.push(await callTranslationAgent(item, targetLang, endpoint, model, proveedor));
                     } else {
                         translatedArray.push(item);
                     }
@@ -234,7 +250,7 @@ export async function translateDocument({
                             continue;
                         }
 
-                        translatedGroup[subKey] = await callTranslationAgent(value[subKey], targetLang, endpoint, model);
+                        translatedGroup[subKey] = await callTranslationAgent(value[subKey], targetLang, endpoint, model, proveedor);
                         groupChanged = true;
                     } else {
                         translatedGroup[subKey] = extractId(value[subKey]);
@@ -248,7 +264,7 @@ export async function translateDocument({
             // Caso 4: Strings simples
             else if (typeof value === 'string' && value.trim().length > 0) {
                 console.log(`[TranslateTool] Traduciendo Texto: ${field} al locale ${targetLang}...`);
-                const translated = await callTranslationAgent(value, targetLang, endpoint, model);
+                const translated = await callTranslationAgent(value, targetLang, endpoint, model, proveedor);
 
                 if (translated) {
                     translatedData[field] = translated;

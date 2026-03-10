@@ -8,30 +8,49 @@ export const ConfiguracionTraduccion: GlobalConfig = {
     },
     fields: [
         {
-            name: 'modeloIA',
+            name: 'proveedorIA',
             type: 'select',
-            label: 'Modelo de Traducción (OpenRouter)',
+            label: 'Proveedor de Traducción',
             required: true,
-            defaultValue: 'google/gemini-2.0-flash-001',
+            defaultValue: 'gemini-api',
             options: [
-                { label: 'Gemini 2.0 Flash (Recomendado)', value: 'google/gemini-2.0-flash-001' },
-                { label: 'GPT-4o', value: 'openai/gpt-4o' },
-                { label: 'Claude 3.5 Sonnet', value: 'anthropic/claude-3.5-sonnet' },
-                { label: 'Gemini Pro 1.5', value: 'google/gemini-pro-1.5' },
-                { label: 'DeepSeek V3', value: 'deepseek/deepseek-chat' },
+                { label: 'Google Gemini API (Directo) — Recomendado para producción', value: 'gemini-api' },
+                { label: 'Agente Python (OpenRouter) — Solo para desarrollo local', value: 'agente-python' },
             ],
             admin: {
-                description: 'Selecciona el modelo de IA que se utilizará para generar traducciones automáticas.',
+                description: 'Gemini API usa GOOGLE_API_KEY del servidor. Agente Python requiere el servicio FastAPI corriendo en el endpoint configurado.',
+            },
+        },
+        {
+            name: 'modeloIA',
+            type: 'select',
+            label: 'Modelo de Traducción',
+            required: true,
+            defaultValue: 'gemini-2.0-flash',
+            options: [
+                // Modelos Gemini API directa
+                { label: 'Gemini 2.0 Flash (Rápido, Recomendado)', value: 'gemini-2.0-flash' },
+                { label: 'Gemini 2.5 Pro (Máxima calidad)', value: 'gemini-2.5-pro-exp-03-25' },
+                { label: 'Gemini 1.5 Flash (Económico)', value: 'gemini-1.5-flash' },
+                { label: 'Gemini 1.5 Pro', value: 'gemini-1.5-pro' },
+                // Modelos OpenRouter (agente Python)
+                { label: 'GPT-4o (OpenRouter)', value: 'openai/gpt-4o' },
+                { label: 'Claude 3.5 Sonnet (OpenRouter)', value: 'anthropic/claude-3.5-sonnet' },
+                { label: 'DeepSeek V3 (OpenRouter)', value: 'deepseek/deepseek-chat' },
+                { label: 'Gemini 2.0 Flash (OpenRouter)', value: 'google/gemini-2.0-flash-001' },
+            ],
+            admin: {
+                description: 'Los modelos Gemini son para el proveedor "Google Gemini API". Los modelos OpenRouter son para el "Agente Python".',
             },
         },
         {
             name: 'endpointAgente',
             type: 'text',
-            label: 'URL del Agente de Traducción',
-            required: true,
+            label: 'URL del Agente Python (solo si usas Agente Python)',
             defaultValue: 'http://localhost:8000/translate',
             admin: {
-                description: 'URL donde está desplegado el agente Python (FastAPI).',
+                description: 'Solo necesario si el proveedor es "Agente Python". URL donde está desplegado el servicio FastAPI.',
+                condition: (data) => data?.proveedorIA === 'agente-python',
             },
         },
     ],
