@@ -125,6 +125,33 @@ async function runDatabaseHotfix() {
       await pool.query(`CREATE INDEX IF NOT EXISTS "paginas_historia_hitos_imagen_idx" ON "paginas_historia_hitos" USING btree ("imagen_id");`);
       console.log("\u2705 paginas_historia_hitos table created.");
     }
+    const configTraduccionExists = await pool.query(`
+      SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'configuracion_traduccion');
+    `);
+    if (!configTraduccionExists.rows[0].exists) {
+      console.log("\u2795 Creating configuracion_traduccion table...");
+      await pool.query(`
+        CREATE TABLE "configuracion_traduccion" (
+          "id" serial PRIMARY KEY,
+          "proveedor_i_a" varchar DEFAULT 'gemini-api',
+          "modelo_i_a" varchar DEFAULT 'gemini-2.0-flash',
+          "endpoint_agente" varchar DEFAULT 'http://localhost:8000/translate',
+          "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+        );
+      `);
+      await pool.query(`
+        INSERT INTO "configuracion_traduccion" ("proveedor_i_a", "modelo_i_a", "endpoint_agente")
+        VALUES ('gemini-api', 'gemini-2.0-flash', 'http://localhost:8000/translate');
+      `);
+      console.log("\u2705 configuracion_traduccion table created with default values.");
+    } else {
+      await pool.query(`
+        INSERT INTO "configuracion_traduccion" ("proveedor_i_a", "modelo_i_a", "endpoint_agente")
+        SELECT 'gemini-api', 'gemini-2.0-flash', 'http://localhost:8000/translate'
+        WHERE NOT EXISTS (SELECT 1 FROM "configuracion_traduccion");
+      `);
+    }
     const backupDeltasExists = await pool.query(`
       SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'backup_deltas');
     `);
@@ -257,7 +284,6 @@ async function start() {
     console.error("\u274C Database hotfix failed:", dbError);
   }
   const app = express();
-
   app.use((req, res, next2) => {
     const isPayloadRoute = /^\/(admin|api|_next)(\/|$)/.test(req.path);
     if (!isPayloadRoute) {
@@ -317,10 +343,7 @@ async function start() {
   app.get("/health", (req, res) => {
     res.status(200).send("OK - Unified Server is up");
   });
-
-  // Servir archivos de medios para que el CDN de Bunny pueda hacer PULL
-  app.use('/api/archivos/file', express.static(path.join(__dirname, 'media')));
-
+  app.use("/api/archivos/file", express.static(path.join(__dirname, "media")));
   app.all(/^\/(admin|_next)($|\/.*)/, (req, res) => {
     return nextHandler(req, res);
   });

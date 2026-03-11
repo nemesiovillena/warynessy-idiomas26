@@ -13,7 +13,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 class TranslationRequest(BaseModel):
     text: str
     target_lang: str
-    model: str = "google/gemini-2.0-flash-001"
+    model: str = "anthropic/claude-3-5-haiku"
 
 @app.get("/")
 async def root():

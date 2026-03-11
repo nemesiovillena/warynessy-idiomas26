@@ -1,11 +1,7 @@
 /**
  * Utilidades para la traducción automática en Payload CMS.
- * Soporta dos proveedores:
- *   - 'gemini-api': Llama directamente a Google Gemini API (requiere GOOGLE_API_KEY)
- *   - 'agente-python': Llama al servicio FastAPI (local o Dokploy via Docker network)
+ * Usa agente Python (FastAPI) con OpenRouter como proveedor único.
  */
-
-import { translateWithGemini } from './gemini-translation-client';
 
 export interface TranslationResponse {
     translated_text: string;
@@ -53,31 +49,24 @@ async function fetchFromPythonAgent(
 
 /**
  * Punto de entrada único para traducción de texto.
- * Enruta al proveedor correcto según configuración.
+ * Llama al agente Python (FastAPI) con OpenRouter.
  */
 export async function callTranslationAgent(
     text: string,
     targetLang: string,
     endpoint: string,
-    model?: string,
-    proveedor?: string
+    model?: string
 ): Promise<string> {
     if (!text || typeof text !== 'string' || text.trim().length === 0) return text;
 
-    const resolvedModel = model || 'gemini-2.0-flash';
-    const resolvedProveedor = proveedor || 'gemini-api';
+    const resolvedModel = model || 'anthropic/claude-3-5-haiku';
 
-    console.log(`[Translation] Traduciendo a '${targetLang}' via '${resolvedProveedor}' (${resolvedModel})...`);
+    console.log(`[Translation] Traduciendo a '${targetLang}' (${resolvedModel})...`);
 
-    // Proveedor: Google Gemini API directa
-    if (resolvedProveedor === 'gemini-api') {
-        return translateWithGemini(text, targetLang, resolvedModel);
-    }
-
-    // Proveedor: Agente Python (con reintento en fallos de red)
+    // Agente Python con reintento en fallos de red
     try {
         const result = await fetchFromPythonAgent(text, targetLang, endpoint, resolvedModel);
-        console.log(`[Translation] Éxito via agente Python para '${targetLang}'.`);
+        console.log(`[Translation] Éxito para '${targetLang}'.`);
         return result;
     } catch (firstError) {
         console.warn(`[Translation] Primer intento fallido, reintentando...`, firstError);
@@ -97,8 +86,7 @@ export async function translateLexical(
     lexicalObj: any,
     targetLang: string,
     endpoint: string,
-    model?: string,
-    proveedor?: string
+    model?: string
 ): Promise<any> {
     if (!lexicalObj || typeof lexicalObj !== 'object') return lexicalObj;
 
@@ -109,7 +97,7 @@ export async function translateLexical(
         // Procesar nodos secuencialmente para evitar saturar el agente
         for (const node of nodes) {
             if (node.text && typeof node.text === 'string' && node.text.trim().length > 0) {
-                node.text = await callTranslationAgent(node.text, targetLang, endpoint, model, proveedor);
+                node.text = await callTranslationAgent(node.text, targetLang, endpoint, model);
             }
             if (node.children && Array.isArray(node.children)) {
                 await traverseNodes(node.children);
@@ -134,7 +122,6 @@ export async function translateDocument({
     targetLang,
     endpoint,
     model,
-    proveedor,
     operation
 }: {
     doc: any;
@@ -143,7 +130,6 @@ export async function translateDocument({
     targetLang: string;
     endpoint: string;
     model?: string;
-    proveedor?: string;
     operation: 'create' | 'update';
 }): Promise<{ translatedData: any; hasTranslations: boolean }> {
     const translatedData: any = {};
@@ -182,7 +168,7 @@ export async function translateDocument({
             // Caso 1: RichText (Lexical)
             if (typeof value === 'object' && value !== null && value.root) {
                 console.log(`[TranslateTool] Traduciendo RichText: ${field} al locale ${targetLang}...`);
-                translatedData[field] = await translateLexical(value, targetLang, endpoint, model, proveedor);
+                translatedData[field] = await translateLexical(value, targetLang, endpoint, model);
                 hasTranslations = true;
             }
             // Caso 2: Arrays
@@ -210,7 +196,7 @@ export async function translateDocument({
                                     continue;
                                 }
 
-                                translatedItem[subKey] = await callTranslationAgent(item[subKey], targetLang, endpoint, model, proveedor);
+                                translatedItem[subKey] = await callTranslationAgent(item[subKey], targetLang, endpoint, model);
                             } else {
                                 translatedItem[subKey] = extractId(item[subKey]);
                             }
@@ -222,7 +208,7 @@ export async function translateDocument({
                             translatedArray.push(item);
                             continue;
                         }
-                        translatedArray.push(await callTranslationAgent(item, targetLang, endpoint, model, proveedor));
+                        translatedArray.push(await callTranslationAgent(item, targetLang, endpoint, model));
                     } else {
                         translatedArray.push(item);
                     }
@@ -250,7 +236,7 @@ export async function translateDocument({
                             continue;
                         }
 
-                        translatedGroup[subKey] = await callTranslationAgent(value[subKey], targetLang, endpoint, model, proveedor);
+                        translatedGroup[subKey] = await callTranslationAgent(value[subKey], targetLang, endpoint, model);
                         groupChanged = true;
                     } else {
                         translatedGroup[subKey] = extractId(value[subKey]);
@@ -264,7 +250,7 @@ export async function translateDocument({
             // Caso 4: Strings simples
             else if (typeof value === 'string' && value.trim().length > 0) {
                 console.log(`[TranslateTool] Traduciendo Texto: ${field} al locale ${targetLang}...`);
-                const translated = await callTranslationAgent(value, targetLang, endpoint, model, proveedor);
+                const translated = await callTranslationAgent(value, targetLang, endpoint, model);
 
                 if (translated) {
                     translatedData[field] = translated;

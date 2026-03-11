@@ -26,7 +26,7 @@ export async function GET(req: Request) {
         await pool.query(`
             DO $$ BEGIN
                 CREATE TYPE "public"."enum_configuracion_traduccion_proveedor_i_a"
-                    AS ENUM('gemini-api', 'agente-python');
+                    AS ENUM('agente-python');
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `)
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
         await pool.query(`
             DO $$ BEGIN
                 CREATE TYPE "public"."enum_configuracion_traduccion_modelo_i_a"
-                    AS ENUM('gemini-2.0-flash', 'gemini-2.5-pro-exp-03-25', 'gemini-1.5-flash', 'gemini-1.5-pro', 'openai/gpt-4o', 'anthropic/claude-3.5-sonnet', 'deepseek/deepseek-chat', 'google/gemini-2.0-flash-001');
+                    AS ENUM('anthropic/claude-3-5-haiku', 'anthropic/claude-3.5-sonnet', 'openai/gpt-4o-mini', 'google/gemini-2.0-flash-001');
             EXCEPTION WHEN duplicate_object THEN NULL;
             END $$;
         `)
@@ -44,14 +44,14 @@ export async function GET(req: Request) {
         // 2. Añadir columna proveedor_i_a si no existe
         await pool.query(`
             ALTER TABLE "configuracion_traduccion"
-            ADD COLUMN IF NOT EXISTS "proveedor_i_a" "enum_configuracion_traduccion_proveedor_i_a" DEFAULT 'gemini-api';
+            ADD COLUMN IF NOT EXISTS "proveedor_i_a" "enum_configuracion_traduccion_proveedor_i_a" DEFAULT 'agente-python';
         `)
         dbLog.push('Column proveedor_i_a: ok')
 
         // 3. Añadir columna modelo_i_a si no existe
         await pool.query(`
             ALTER TABLE "configuracion_traduccion"
-            ADD COLUMN IF NOT EXISTS "modelo_i_a" "enum_configuracion_traduccion_modelo_i_a" DEFAULT 'gemini-2.0-flash';
+            ADD COLUMN IF NOT EXISTS "modelo_i_a" "enum_configuracion_traduccion_modelo_i_a" DEFAULT 'anthropic/claude-3-5-haiku';
         `)
         dbLog.push('Column modelo_i_a: ok')
 
@@ -63,16 +63,16 @@ export async function GET(req: Request) {
         if (count === 0) {
             await pool.query(`
                 INSERT INTO "configuracion_traduccion" ("proveedor_i_a", "modelo_i_a", "endpoint_agente")
-                VALUES ('gemini-api', 'gemini-2.0-flash', 'http://localhost:8000/translate');
+                VALUES ('agente-python', 'anthropic/claude-3-5-haiku', 'http://localhost:8000/translate');
             `)
             dbLog.push('Default row inserted.')
         } else {
             await pool.query(`
                 UPDATE "configuracion_traduccion"
-                SET "proveedor_i_a" = 'gemini-api', "modelo_i_a" = 'gemini-2.0-flash', "updated_at" = now()
+                SET "proveedor_i_a" = 'agente-python', "modelo_i_a" = 'anthropic/claude-3-5-haiku', "updated_at" = now()
                 WHERE id = (SELECT id FROM "configuracion_traduccion" ORDER BY id LIMIT 1);
             `)
-            dbLog.push('Row updated to gemini-api.')
+            dbLog.push('Row updated to agente-python.')
         }
 
         // 5. Verificar resultado final

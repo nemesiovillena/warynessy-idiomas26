@@ -38,8 +38,7 @@ export const Menus: CollectionConfig = {
             try {
               const configTraduccion: any = await payload.findGlobal({ slug: 'configuracion-traduccion' as any });
               const endpoint = configTraduccion?.endpointAgente || 'http://localhost:8000/translate';
-              const modelo = configTraduccion?.modeloIA || 'gemini-2.0-flash';
-              const proveedor = configTraduccion?.proveedorIA || 'gemini-api';
+              const modelo = configTraduccion?.modeloIA || 'anthropic/claude-3-5-haiku';
 
               const targetLocales = ['ca', 'en', 'fr', 'de'] as const;
               const fieldsToTranslate = ['nombre', 'etiqueta', 'descripcion_menu', 'fechasDias', 'descripcion'];
@@ -54,7 +53,7 @@ export const Menus: CollectionConfig = {
                   targetLang: locale,
                   endpoint,
                   model: modelo,
-                  proveedor,
+                  
                   operation
                 });
 
