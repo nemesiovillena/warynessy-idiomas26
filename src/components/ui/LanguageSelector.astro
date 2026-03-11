@@ -31,23 +31,21 @@ function getUrlForLocale(localeCode: string) {
 }
 ---
 
-<div class="relative" id="language-selector">
+<div class="relative js-language-selector">
   <button
     type="button"
-    id="lang-toggle"
-    class="flex items-center gap-2 px-3 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:border-white/30 transition-all duration-300"
+    class="js-lang-toggle flex items-center gap-2 px-3 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-white/80 hover:text-white hover:border-white/30 transition-all duration-300"
     aria-expanded="false"
     aria-haspopup="true"
   >
     <span class="text-lg leading-none">{currentLanguage.flag}</span>
     <span class="text-sm font-medium hidden md:inline uppercase">{currentLanguage.code}</span>
-    <span id="lang-chevron" class="material-symbols-outlined text-sm transition-transform duration-300">expand_more</span>
+    <span class="js-lang-chevron material-symbols-outlined text-sm transition-transform duration-300">expand_more</span>
   </button>
 
   <!-- Dropdown Menu -->
   <div
-    id="lang-dropdown"
-    class="absolute right-0 top-full mt-2 w-48 py-2 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl shadow-2xl opacity-0 invisible translate-y-2 transition-all duration-300 z-50 overflow-hidden"
+    class="js-lang-dropdown absolute right-0 top-full mt-2 w-48 py-2 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl shadow-2xl opacity-0 invisible translate-y-2 transition-all duration-300 z-50 overflow-hidden"
   >
     <div class="px-4 py-2 text-[10px] uppercase tracking-widest text-white/40 font-bold border-b border-white/5 mb-1">
       {selectLabel}
@@ -72,30 +70,60 @@ function getUrlForLocale(localeCode: string) {
 </div>
 
 <script>
-  const toggle = document.getElementById('lang-toggle');
-  const dropdown = document.getElementById('lang-dropdown');
-  const chevron = document.getElementById('lang-chevron');
+  function initLanguageSelector() {
+    const selectors = document.querySelectorAll('.js-language-selector');
 
-  function openDropdown() {
-    dropdown?.classList.remove('opacity-0', 'invisible', 'translate-y-2');
-    dropdown?.classList.add('opacity-100', 'visible', 'translate-y-0');
-    chevron?.classList.add('rotate-180');
-    toggle?.setAttribute('aria-expanded', 'true');
+    selectors.forEach(selector => {
+      const toggle = selector.querySelector('.js-lang-toggle') as HTMLButtonElement;
+      const dropdown = selector.querySelector('.js-lang-dropdown') as HTMLDivElement;
+      const chevron = selector.querySelector('.js-lang-chevron') as HTMLElement;
+
+      if (!toggle || !dropdown) return;
+
+      function openDropdown() {
+        dropdown.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+        dropdown.classList.add('opacity-100', 'visible', 'translate-y-0');
+        chevron?.classList.add('rotate-180');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeDropdown() {
+        dropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        dropdown.classList.remove('opacity-100', 'visible', 'translate-y-0');
+        chevron?.classList.remove('rotate-180');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+
+      toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        // Cerrar otros dropdowns primero para evitar solapamientos
+        document.querySelectorAll('.js-language-selector').forEach(other => {
+          if (other !== selector) {
+            const otherToggle = other.querySelector('.js-lang-toggle');
+            const otherDropdown = other.querySelector('.js-lang-dropdown');
+            const otherChevron = other.querySelector('.js-lang-chevron');
+            
+            otherDropdown?.classList.add('opacity-0', 'invisible', 'translate-y-2');
+            otherDropdown?.classList.remove('opacity-100', 'visible', 'translate-y-0');
+            otherChevron?.classList.remove('rotate-180');
+            otherToggle?.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+        isOpen ? closeDropdown() : openDropdown();
+      });
+
+      // Cerrar al hacer click fuera
+      document.addEventListener('click', (e) => {
+        if (!selector.contains(e.target as Node)) {
+          closeDropdown();
+        }
+      });
+    });
   }
 
-  function closeDropdown() {
-    dropdown?.classList.add('opacity-0', 'invisible', 'translate-y-2');
-    dropdown?.classList.remove('opacity-100', 'visible', 'translate-y-0');
-    chevron?.classList.remove('rotate-180');
-    toggle?.setAttribute('aria-expanded', 'false');
-  }
-
-  toggle?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = toggle.getAttribute('aria-expanded') === 'true';
-    isOpen ? closeDropdown() : openDropdown();
-  });
-
-  // Cerrar al hacer click fuera
-  document.addEventListener('click', () => closeDropdown());
+  // Ejecutar en carga inicial y en cada navegación de Astro (View Transitions)
+  document.addEventListener('astro:page-load', initLanguageSelector);
 </script>

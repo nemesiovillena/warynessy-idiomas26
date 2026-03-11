@@ -49,20 +49,22 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
     }
 
     // Si viene de localhost o de la URL del servidor configurada
+    // IMPORTANTE: Siempre strippear el dominio si vamos a usar CDN, 
+    // de lo contrario tendremos URLs como bunny.net/http://localhost...
     if (path.includes('localhost:3000') || (PAYLOAD_URL && path.includes(PAYLOAD_URL))) {
-        // No strippear si vamos a devolver la URL local
-        if (!shouldIgnoreCDN || !BUNNY_URL) {
-            path = path.split('localhost:3000').pop() as string;
-            path = path.split(PAYLOAD_URL).pop() as string;
+        path = path.split('localhost:3000').pop() as string;
+        path = path.split(PAYLOAD_URL).pop() as string;
+    }
+
+    // Limpiar prefijos de Payload si existen para que la ruta sea relativa a la raíz de Bunny
+    // Payload usa /media/ o /api/archivos/file/ dependiendo de la versión y config
+    const prefixesToRemove = ['/api/archivos/file/', '/media/'];
+    for (const prefix of prefixesToRemove) {
+        if (path.includes(prefix)) {
+            path = '/' + path.split(prefix)[1];
+            break;
         }
     }
-
-    // Limpiar paths de la API de Payload si existen (SOLO para Bunny)
-    const isPayloadPath = path.includes('/api/archivos/file/');
-    if (isPayloadPath && BUNNY_URL && !shouldIgnoreCDN) {
-        path = '/' + path.split('/api/archivos/file/')[1];
-    }
-
 
     // Si sigue siendo una URL absoluta externa (S3, etc), no hacemos nada
     if (path.startsWith('http') && !path.includes('localhost:3000') && (PAYLOAD_URL && !path.includes(PAYLOAD_URL))) {
