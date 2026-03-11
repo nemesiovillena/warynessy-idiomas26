@@ -72,14 +72,14 @@ jobs:
       - name: 🔍 Verificar migraciones seguras
         run: |
           echo "🔍 Verificando seguridad de migraciones..."
-          
-          # Buscar migraciones con operaciones peligrosas
-          if find src/migrations -name "*.ts" -exec grep -l "DROP TABLE\|DROP SCHEMA\|DELETE FROM\|TRUNCATE" {} \; | grep -q .; then
-            echo "❌ ERROR: Se encontraron operaciones peligrosas en migraciones:"
-            find src/migrations -name "*.ts" -exec grep -Hn "DROP TABLE\|DROP SCHEMA\|DELETE FROM\|TRUNCATE" {} \;
+
+          # Buscar migraciones con operaciones peligrosas (excluyendo la inicial que tiene DROP TABLE legítimos)
+          if find src/migrations -name "*.ts" ! -name "*initial*" -exec grep -l "DROP TABLE\|DROP SCHEMA\|DELETE FROM\|TRUNCATE" {} \; | grep -q .; then
+            echo "❌ ERROR: Se encontraron operaciones peligrosas en migraciones posteriores:"
+            find src/migrations -name "*.ts" ! -name "*initial*" -exec grep -Hn "DROP TABLE\|DROP SCHEMA\|DELETE FROM\|TRUNCATE" {} \;
             exit 1
           else
-            echo "✅ No se encontraron operaciones peligrosas en migraciones"
+            echo "✅ No se encontraron operaciones peligrosas en migraciones (initial excluida)"
           fi
       
       - name: 🏗️ Build de Astro
