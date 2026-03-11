@@ -70,50 +70,50 @@ function getUrlForLocale(localeCode: string) {
 </div>
 
 <script>
+  // AbortController global: se cancela en cada page-load para limpiar listeners anteriores
+  let langAbort = new AbortController();
+
   function initLanguageSelector() {
-    const selectors = document.querySelectorAll('.js-language-selector');
+    // Cancelar y reemplazar el controller — elimina todos los listeners del ciclo anterior
+    langAbort.abort();
+    langAbort = new AbortController();
+    const { signal } = langAbort;
 
-    selectors.forEach(selector => {
-      // Evitar doble inicialización en el mismo elemento
-      if ((selector as HTMLElement).dataset.langInit === '1') return;
-      (selector as HTMLElement).dataset.langInit = '1';
-
+    document.querySelectorAll('.js-language-selector').forEach(selector => {
       const toggle = selector.querySelector('.js-lang-toggle') as HTMLButtonElement;
       const dropdown = selector.querySelector('.js-lang-dropdown') as HTMLDivElement;
       const chevron = selector.querySelector('.js-lang-chevron') as HTMLElement;
 
       if (!toggle || !dropdown) return;
 
-      function openDropdown() {
-        dropdown.classList.remove('opacity-0', 'invisible', 'translate-y-2');
-        dropdown.classList.add('opacity-100', 'visible', 'translate-y-0');
+      const open = () => {
+        dropdown.classList.replace('opacity-0', 'opacity-100');
+        dropdown.classList.remove('invisible', 'translate-y-2');
+        dropdown.classList.add('visible', 'translate-y-0');
         chevron?.classList.add('rotate-180');
         toggle.setAttribute('aria-expanded', 'true');
-      }
+      };
 
-      function closeDropdown() {
-        dropdown.classList.add('opacity-0', 'invisible', 'translate-y-2');
-        dropdown.classList.remove('opacity-100', 'visible', 'translate-y-0');
+      const close = () => {
+        dropdown.classList.replace('opacity-100', 'opacity-0');
+        dropdown.classList.add('invisible', 'translate-y-2');
+        dropdown.classList.remove('visible', 'translate-y-0');
         chevron?.classList.remove('rotate-180');
         toggle.setAttribute('aria-expanded', 'false');
-      }
+      };
 
+      // Click en el botón abre/cierra
       toggle.addEventListener('click', (e) => {
         e.stopPropagation();
-        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
-        isOpen ? closeDropdown() : openDropdown();
-      });
+        toggle.getAttribute('aria-expanded') === 'true' ? close() : open();
+      }, { signal });
 
-      // Cerrar al hacer click fuera
+      // Click fuera cierra
       document.addEventListener('click', (e) => {
-        if (!selector.contains(e.target as Node)) {
-          closeDropdown();
-        }
-      });
+        if (!selector.contains(e.target as Node)) close();
+      }, { signal });
     });
   }
 
-  // En cada navegación de View Transitions, el DOM se reemplaza → los data-lang-init
-  // desaparecen → initLanguageSelector puede re-inicializar correctamente
   document.addEventListener('astro:page-load', initLanguageSelector);
 </script>
