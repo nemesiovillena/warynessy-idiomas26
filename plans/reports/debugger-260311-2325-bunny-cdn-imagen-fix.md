@@ -183,12 +183,40 @@ const heroImage = typeof pageData?.heroImage === 'object' && pageData?.heroImage
 
 ---
 
+## Refinamiento Final (Commit 2)
+
+Después del primer commit, se descubrió que las imágenes de **todo el proyecto** dejaron de funcionar. La causa: la función `getOptimizedImageUrl()` estaba limpiando los prefijos de Payload incluso cuando NO se usaba Bunny CDN.
+
+**Solución:** Mantener dos rutas paralelas:
+- `originalPayloadPath` - Con prefijos intactos para Payload local
+- `cleanedPath` - Sin prefijos para Bunny CDN
+
+```typescript
+// Guardar la ruta original antes de limpiarla
+let originalPayloadPath = src;
+let cleanedPath = path;
+
+// ... procesar...
+
+// En desarrollo sin Bunny Storage:
+return `${PAYLOAD_URL}${originalPayloadPath}`;  // ✅ Mantiene /api/archivos/file/
+
+// En producción con Bunny Storage:
+return `${BUNNY_URL}${cleanedPath}`;  // ✅ Usa ruta limpiada sin prefijos
+```
+
+---
+
 ## Archivos Modificados
-- `src/lib/cdn.ts` - Agregada lógica de verificación de Bunny Storage
-- `src/pages/[lang]/historia.astro` - Removido doble-procesamiento de imágenes
+- `src/lib/cdn.ts` (Commit 1 + 2):
+  - Agregada lógica de verificación de `BUNNY_STORAGE_ZONE_NAME`
+  - Preserva rutas de Payload local cuando no usa CDN
+  - Limpia rutas solo para Bunny CDN
+- `src/pages/[lang]/historia.astro`:
+  - Removido doble-procesamiento de imágenes
 
 ## Impacto
-- **Alcance:** Página Historia exclusivamente
+- **Alcance:** Todas las páginas que usan imágenes
 - **Usuarios afectados:** Solo desarrollo local
 - **Breaking Changes:** Ninguno
-- **Estado:** ✅ COMPLETAMENTE RESUELTO
+- **Estado:** ✅ COMPLETAMENTE RESUELTO (Ambos commits aplicados)
