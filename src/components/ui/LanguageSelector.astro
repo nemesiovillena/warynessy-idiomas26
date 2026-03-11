@@ -70,7 +70,15 @@ function getUrlForLocale(localeCode: string) {
 </div>
 
 <script>
+  // AbortController para limpiar listeners entre navegaciones
+  let langSelectorAbort: AbortController | null = null;
+
   function initLanguageSelector() {
+    // Cancelar listeners previos antes de re-inicializar
+    langSelectorAbort?.abort();
+    langSelectorAbort = new AbortController();
+    const signal = langSelectorAbort.signal;
+
     const selectors = document.querySelectorAll('.js-language-selector');
 
     selectors.forEach(selector => {
@@ -96,14 +104,13 @@ function getUrlForLocale(localeCode: string) {
 
       toggle.addEventListener('click', (e) => {
         e.stopPropagation();
-        
+
         // Cerrar otros dropdowns primero para evitar solapamientos
         document.querySelectorAll('.js-language-selector').forEach(other => {
           if (other !== selector) {
-            const otherToggle = other.querySelector('.js-lang-toggle');
             const otherDropdown = other.querySelector('.js-lang-dropdown');
             const otherChevron = other.querySelector('.js-lang-chevron');
-            
+            const otherToggle = other.querySelector('.js-lang-toggle');
             otherDropdown?.classList.add('opacity-0', 'invisible', 'translate-y-2');
             otherDropdown?.classList.remove('opacity-100', 'visible', 'translate-y-0');
             otherChevron?.classList.remove('rotate-180');
@@ -113,14 +120,14 @@ function getUrlForLocale(localeCode: string) {
 
         const isOpen = toggle.getAttribute('aria-expanded') === 'true';
         isOpen ? closeDropdown() : openDropdown();
-      });
+      }, { signal });
 
-      // Cerrar al hacer click fuera
+      // Cerrar al hacer click fuera — un solo listener por inicialización
       document.addEventListener('click', (e) => {
         if (!selector.contains(e.target as Node)) {
           closeDropdown();
         }
-      });
+      }, { signal });
     });
   }
 
