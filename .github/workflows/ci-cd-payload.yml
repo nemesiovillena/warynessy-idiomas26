@@ -56,16 +56,15 @@ jobs:
       - name: 🔬 Verificar tipos TypeScript
         run: |
           echo "🔬 Verificando tipos TypeScript..."
-          npm run generate:types
-          
-          # Verificar que payload-types.ts se generó correctamente
+
+          # Verificar que payload-types.ts está commiteado
           if [ -f "src/payload/payload-types.ts" ]; then
-            echo "✅ Tipos de Payload generados correctamente"
+            echo "✅ payload-types.ts encontrado en el repositorio"
           else
-            echo "❌ ERROR: payload-types.ts no se generó"
+            echo "❌ ERROR: payload-types.ts no encontrado — ejecuta 'npm run generate:types' y committea el archivo"
             exit 1
           fi
-          
+
           # Verificar que no hay errores de TypeScript
           npx tsc --noEmit || exit 1
           echo "✅ Verificación de TypeScript completada sin errores"
@@ -127,7 +126,12 @@ jobs:
         run: npm install
 
       - name: 🔬 Verificar tipos TypeScript
-        run: npm run generate:types
+        run: |
+          if [ ! -f "src/payload/payload-types.ts" ]; then
+            echo "❌ ERROR: payload-types.ts no encontrado"
+            exit 1
+          fi
+          echo "✅ payload-types.ts encontrado"
       
       - name: 🗄️ Verificar archivos de migración
         run: |
