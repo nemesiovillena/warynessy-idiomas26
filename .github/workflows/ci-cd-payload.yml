@@ -29,8 +29,8 @@ jobs:
           cache: 'npm'
       
       - name: 📦 Instalar dependencias
-        run: npm ci
-      
+        run: npm install
+
       - name: 🔍 Verificar seguridad de scripts
         run: |
           echo "🔍 Verificando seguridad de scripts de base de datos..."
@@ -124,8 +124,8 @@ jobs:
           cache: 'npm'
       
       - name: 📦 Instalar dependencias
-        run: npm ci
-      
+        run: npm install
+
       - name: 🔬 Verificar tipos TypeScript
         run: npm run generate:types
       
