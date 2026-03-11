@@ -2,76 +2,77 @@
 import MainLayout from '../../layouts/MainLayout.astro';
 import Section from '../../components/ui/Section.astro';
 import Container from '../../components/ui/Container.astro';
+import { privacidadTranslations } from '../../lib/i18n/legal-page-translations';
 
 const { lang } = Astro.params;
 const locale = lang || 'es';
 
-const pageTitle = "Política de Privacidad | Warynessy";
+const t = privacidadTranslations[locale as keyof typeof privacidadTranslations] ?? privacidadTranslations.es;
 ---
 
-<MainLayout title={pageTitle}>
+<MainLayout title={t.pageTitle}>
   <Section class="py-32 bg-white min-h-screen">
     <Container class="max-w-4xl">
-      <h1 class="text-4xl font-serif font-bold mb-8 text-gray-900">Política de Privacidad</h1>
+      <h1 class="text-4xl font-serif font-bold mb-8 text-gray-900">{t.h1}</h1>
       <div class="prose prose-lg max-w-none text-gray-700">
 
-        <p>En cumplimiento del Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo de 27 de abril de 2016 (RGPD) y la Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales (LOPD-GDD), le informamos sobre el tratamiento de sus datos personales.</p>
+        <p>{t.intro}</p>
 
-        <h2>1. Responsable del Tratamiento</h2>
+        <h2>{t.s1Title}</h2>
         <ul>
-          <li><strong>Identidad:</strong> Restaurante Warynessy</li>
-          <li><strong>Dirección:</strong> Villena, Alicante, España</li>
-          <li><strong>Email de contacto:</strong> contacto@warynessy.com</li>
+          <li><strong>{t.s1Identity}</strong> Restaurante Warynessy</li>
+          <li><strong>{t.s1Address}</strong> Villena, Alicante, España</li>
+          <li><strong>{t.s1Email}</strong> contacto@warynessy.com</li>
         </ul>
 
-        <h2>2. Finalidad del Tratamiento</h2>
-        <p>Los datos personales que nos facilite serán tratados con las siguientes finalidades:</p>
+        <h2>{t.s2Title}</h2>
+        <p>{t.s2}</p>
         <ul>
-          <li>Gestionar las consultas realizadas a través del formulario de contacto.</li>
-          <li>Gestionar las reservas realizadas en el restaurante.</li>
-          <li>Enviar comunicaciones comerciales si ha dado su consentimiento expreso.</li>
-          <li>Mantener la relación comercial y prestar los servicios solicitados.</li>
+          <li>{t.s2li1}</li>
+          <li>{t.s2li2}</li>
+          <li>{t.s2li3}</li>
+          <li>{t.s2li4}</li>
         </ul>
 
-        <h2>3. Legitimación</h2>
-        <p>La base legal para el tratamiento de sus datos es:</p>
+        <h2>{t.s3Title}</h2>
+        <p>{t.s3}</p>
         <ul>
-          <li>El consentimiento del interesado para las consultas de contacto.</li>
-          <li>La ejecución del contrato para la prestación de servicios de restauración.</li>
-          <li>El interés legítimo para el envío de comunicaciones comerciales a clientes.</li>
+          <li>{t.s3li1}</li>
+          <li>{t.s3li2}</li>
+          <li>{t.s3li3}</li>
         </ul>
 
-        <h2>4. Destinatarios</h2>
-        <p>Sus datos no serán cedidos a terceros, salvo obligación legal. En caso de ser necesario para la prestación del servicio, podrán acceder a los datos:</p>
+        <h2>{t.s4Title}</h2>
+        <p>{t.s4}</p>
         <ul>
-          <li>Proveedores de servicios tecnológicos (hosting, email).</li>
-          <li>Plataformas de reservas (CoverManager) para la gestión de reservas.</li>
-          <li>Administraciones públicas cuando exista obligación legal.</li>
+          <li>{t.s4li1}</li>
+          <li>{t.s4li2}</li>
+          <li>{t.s4li3}</li>
         </ul>
 
-        <h2>5. Conservación de Datos</h2>
-        <p>Los datos personales se conservarán mientras se mantenga la relación comercial y durante el tiempo necesario para cumplir con las obligaciones legales. Los datos de contacto se conservarán mientras no solicite su supresión.</p>
+        <h2>{t.s5Title}</h2>
+        <p>{t.s5}</p>
 
-        <h2>6. Derechos del Interesado</h2>
-        <p>Usted tiene derecho a:</p>
+        <h2>{t.s6Title}</h2>
+        <p>{t.s6}</p>
         <ul>
-          <li><strong>Acceso:</strong> Conocer si estamos tratando sus datos personales.</li>
-          <li><strong>Rectificación:</strong> Solicitar la corrección de datos inexactos.</li>
-          <li><strong>Supresión:</strong> Solicitar la eliminación de sus datos.</li>
-          <li><strong>Limitación:</strong> Solicitar la limitación del tratamiento en determinados casos.</li>
-          <li><strong>Portabilidad:</strong> Recibir sus datos en formato estructurado.</li>
-          <li><strong>Oposición:</strong> Oponerse al tratamiento de sus datos.</li>
+          <li><strong>{t.s6Access}</strong> {t.s6AccessDesc}</li>
+          <li><strong>{t.s6Rectification}</strong> {t.s6RectificationDesc}</li>
+          <li><strong>{t.s6Deletion}</strong> {t.s6DeletionDesc}</li>
+          <li><strong>{t.s6Restriction}</strong> {t.s6RestrictionDesc}</li>
+          <li><strong>{t.s6Portability}</strong> {t.s6PortabilityDesc}</li>
+          <li><strong>{t.s6Opposition}</strong> {t.s6OppositionDesc}</li>
         </ul>
-        <p>Para ejercer estos derechos, puede dirigirse a <strong>contacto@warynessy.com</strong> indicando su solicitud y acompañando copia de su documento de identidad.</p>
-        <p>También tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD) en <a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>.</p>
+        <p>{t.s6Contact} <strong>contacto@warynessy.com</strong> {t.s6ContactSuffix}</p>
+        <p>{t.s6AEPD} <a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a>.</p>
 
-        <h2>7. Seguridad</h2>
-        <p>Restaurante Warynessy ha adoptado las medidas técnicas y organizativas necesarias para garantizar la seguridad de los datos personales y evitar su alteración, pérdida, tratamiento o acceso no autorizado, habida cuenta del estado de la tecnología, la naturaleza de los datos almacenados y los riesgos a los que están expuestos.</p>
+        <h2>{t.s7Title}</h2>
+        <p>{t.s7}</p>
 
-        <h2>8. Formulario de Contacto</h2>
-        <p>Al rellenar el formulario de contacto de nuestra web y enviar su consulta, usted acepta de forma expresa que tratemos sus datos con la finalidad de atender su solicitud. Los datos proporcionados se conservarán mientras se mantenga la consulta activa o durante el tiempo necesario para cumplir con obligaciones legales.</p>
+        <h2>{t.s8Title}</h2>
+        <p>{t.s8}</p>
 
-        <p class="text-sm text-gray-500 mt-12 italic">Última actualización: Enero 2026</p>
+        <p class="text-sm text-gray-500 mt-12 italic">{t.lastUpdated}</p>
       </div>
     </Container>
   </Section>

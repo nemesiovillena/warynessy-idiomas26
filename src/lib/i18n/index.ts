@@ -13,7 +13,14 @@ export {
   contactoPageTranslations,
   menuSlugTranslations,
   historiaPageTranslations,
+  experienciasPageTranslations,
+  reservasPageTranslations,
 } from './page-translations'
+export {
+  avisoLegalTranslations,
+  privacidadTranslations,
+  cookiesPolicyTranslations,
+} from './legal-page-translations'
 export { homeTranslations } from './home-translations'
 
 export type Locale = 'es' | 'ca' | 'en' | 'fr' | 'de'
@@ -34,6 +41,8 @@ import {
   contactoPageTranslations,
   menuSlugTranslations,
   historiaPageTranslations,
+  experienciasPageTranslations,
+  reservasPageTranslations,
 } from './page-translations'
 
 // Composite translations object — typed from the Spanish (default) locale
@@ -50,6 +59,8 @@ const translations = {
     contacto: contactoPageTranslations.es,
     menuSlug: menuSlugTranslations.es,
     historia: historiaPageTranslations.es,
+    experiencias: experienciasPageTranslations.es,
+    reservas: reservasPageTranslations.es,
   },
   ca: {
     home: homeTranslations.ca,
@@ -63,6 +74,8 @@ const translations = {
     contacto: contactoPageTranslations.ca,
     menuSlug: menuSlugTranslations.ca,
     historia: historiaPageTranslations.ca,
+    experiencias: experienciasPageTranslations.ca,
+    reservas: reservasPageTranslations.ca,
   },
   en: {
     home: homeTranslations.en,
@@ -76,6 +89,8 @@ const translations = {
     contacto: contactoPageTranslations.en,
     menuSlug: menuSlugTranslations.en,
     historia: historiaPageTranslations.en,
+    experiencias: experienciasPageTranslations.en,
+    reservas: reservasPageTranslations.en,
   },
   fr: {
     home: homeTranslations.fr,
@@ -89,6 +104,8 @@ const translations = {
     contacto: contactoPageTranslations.fr,
     menuSlug: menuSlugTranslations.fr,
     historia: historiaPageTranslations.fr,
+    experiencias: experienciasPageTranslations.fr,
+    reservas: reservasPageTranslations.fr,
   },
   de: {
     home: homeTranslations.de,
@@ -102,6 +119,8 @@ const translations = {
     contacto: contactoPageTranslations.de,
     menuSlug: menuSlugTranslations.de,
     historia: historiaPageTranslations.de,
+    experiencias: experienciasPageTranslations.de,
+    reservas: reservasPageTranslations.de,
   },
 }
 

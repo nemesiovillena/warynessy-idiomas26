@@ -4,10 +4,12 @@ import Section from '../../components/ui/Section.astro';
 import Container from '../../components/ui/Container.astro';
 import { getSiteSettings, getPaginaBySlug } from '../../lib/payload-local';
 import { getOptimizedImageUrl } from '../../lib/cdn';
+import { getTranslations } from '../../lib/i18n';
 
 const { lang } = Astro.params;
 const locale = lang || 'es';
 
+const t = getTranslations(locale).experiencias;
 const siteSettings = await getSiteSettings(locale);
 const pageData = await getPaginaBySlug('experiencias', locale);
 
@@ -62,7 +64,7 @@ const heroImg = getOptimizedImageUrl(rawHeroImg, {
              src={`https://www.covermanager.com/eco/buy_products/restaurante-warynessy/${covermanagerLang}`}
              style="width: 1px; min-width: 100%; height: 600px; border: none;"
              id="restaurante-warynessy-experiencias"
-             title="Comprar Tarjeta Regalo / Experiencias"
+             title={t.iframeTitle}
              allow="payment"
              scrolling="no"
            ></iframe>
@@ -96,20 +98,20 @@ const heroImg = getOptimizedImageUrl(rawHeroImg, {
         <div class="p-8 bg-white/5 rounded-2xl border border-white/10">
           <h2 class="text-white font-serif text-xl font-bold mb-6 flex items-center gap-3">
             <span class="material-symbols-outlined text-primary">description</span>
-            Cómo funciona
+            {t.howItWorksTitle}
           </h2>
           <ul class="space-y-4 text-white/60 text-sm leading-relaxed">
             <li class="flex gap-3">
               <span class="text-primary font-bold">01.</span>
-              <span>Selecciona el menú que quieres regalar entre nuestras opciones.</span>
+              <span>{t.step1}</span>
             </li>
             <li class="flex gap-3">
               <span class="text-primary font-bold">02.</span>
-              <span>Rellena los datos de la persona a la que se lo quieres enviar.</span>
+              <span>{t.step2}</span>
             </li>
             <li class="flex gap-3">
               <span class="text-primary font-bold">03.</span>
-              <span>Recibirán una tarjeta regalo con un código único para su reserva.</span>
+              <span>{t.step3}</span>
             </li>
           </ul>
         </div>
@@ -117,15 +119,15 @@ const heroImg = getOptimizedImageUrl(rawHeroImg, {
         <div class="p-8 bg-white/5 rounded-2xl border border-white/10">
           <h2 class="text-white font-serif text-xl font-bold mb-6 flex items-center gap-3">
             <span class="material-symbols-outlined text-primary">confirmation_number</span>
-            Cómo canjearla
+            {t.howToRedeemTitle}
           </h2>
           <div class="space-y-4 text-white/60 text-sm leading-relaxed">
-            <p>Es imprescindible reservar con antelación indicando el código proporcionado en la tarjeta.</p>
+            <p>{t.redeemDesc}</p>
             <div class="pt-4 border-t border-white/10 space-y-2">
               <p class="flex items-center gap-2"><span class="material-symbols-outlined text-xs text-primary">call</span> 96 580 10 47</p>
               <p class="flex items-center gap-2"><span class="material-symbols-outlined text-xs text-primary">chat</span> 619 73 77 70 (WhatsApp)</p>
             </div>
-            <p class="text-xs text-white/40 italic mt-4">Validez de la tarjeta regalo: 3 meses desde la compra.</p>
+            <p class="text-xs text-white/40 italic mt-4">{t.giftCardValidity}</p>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-// Page-level UI strings: menus, carta, espacios, contacto, menuSlug
+// Page-level UI strings: menus, carta, espacios, contacto, menuSlug, experiencias, reservas
 // Keys match exactly what each page uses as inline `t` object
 
 export const menusPageTranslations = {
@@ -8,6 +8,10 @@ export const menusPageTranslations = {
     subtitle: 'Experiencias culinarias diseñadas para cada momento',
     groupsTitle: 'Menús para Grupos',
     noMenus: 'Próximamente nuevos menús de temporada.',
+    degustacionFallback: 'Menús Degustación',
+    protectedContent: 'Este contenido está protegido.',
+    passwordPlaceholder: 'Contraseña',
+    wrongPassword: 'Contraseña incorrecta',
   },
   ca: {
     badge: 'Exclusivitat',
@@ -15,6 +19,10 @@ export const menusPageTranslations = {
     subtitle: 'Experiències culinàries dissenyades per a cada moment',
     groupsTitle: 'Menús per a Grups',
     noMenus: 'Pròximament nous menús de temporada.',
+    degustacionFallback: 'Menús Degustació',
+    protectedContent: 'Aquest contingut està protegit.',
+    passwordPlaceholder: 'Contrasenya',
+    wrongPassword: 'Contrasenya incorrecta',
   },
   en: {
     badge: 'Exclusivity',
@@ -22,6 +30,10 @@ export const menusPageTranslations = {
     subtitle: 'Culinary experiences designed for every occasion',
     groupsTitle: 'Group Menus',
     noMenus: 'New seasonal menus coming soon.',
+    degustacionFallback: 'Tasting Menus',
+    protectedContent: 'This content is protected.',
+    passwordPlaceholder: 'Password',
+    wrongPassword: 'Wrong password',
   },
   fr: {
     badge: 'Exclusivité',
@@ -29,6 +41,10 @@ export const menusPageTranslations = {
     subtitle: 'Expériences culinaires conçues pour chaque moment',
     groupsTitle: 'Menus de Groupe',
     noMenus: 'Prochainement de nouveaux menus de saison.',
+    degustacionFallback: 'Menus Dégustation',
+    protectedContent: 'Ce contenu est protégé.',
+    passwordPlaceholder: 'Mot de passe',
+    wrongPassword: 'Mot de passe incorrect',
   },
   de: {
     badge: 'Exklusivität',
@@ -36,6 +52,10 @@ export const menusPageTranslations = {
     subtitle: 'Kulinarische Erlebnisse für jeden Anlass',
     groupsTitle: 'Gruppenmenüs',
     noMenus: 'Demnächst neue Saisonmenüs.',
+    degustacionFallback: 'Degustationsmenüs',
+    protectedContent: 'Dieser Inhalt ist geschützt.',
+    passwordPlaceholder: 'Passwort',
+    wrongPassword: 'Falsches Passwort',
   },
 } as const
 
@@ -400,6 +420,7 @@ export const menuSlugTranslations = {
     lunchDinner: 'Comida y Cena',
     dateFrom: 'Del',
     dateTo: 'al',
+    dayLun: 'Lun', dayMar: 'Mar', dayMie: 'Mié', dayJue: 'Jue', dayVie: 'Vie', daySab: 'Sáb', dayDom: 'Dom',
   },
   ca: {
     perPerson: '/ persona',
@@ -419,6 +440,7 @@ export const menuSlugTranslations = {
     lunchDinner: 'Dinar i Sopar',
     dateFrom: 'Del',
     dateTo: 'al',
+    dayLun: 'Dil', dayMar: 'Dim', dayMie: 'Dim', dayJue: 'Dij', dayVie: 'Div', daySab: 'Dis', dayDom: 'Diu',
   },
   en: {
     perPerson: '/ person',
@@ -438,6 +460,7 @@ export const menuSlugTranslations = {
     lunchDinner: 'Lunch & Dinner',
     dateFrom: 'From',
     dateTo: 'to',
+    dayLun: 'Mon', dayMar: 'Tue', dayMie: 'Wed', dayJue: 'Thu', dayVie: 'Fri', daySab: 'Sat', dayDom: 'Sun',
   },
   fr: {
     perPerson: '/ personne',
@@ -457,6 +480,7 @@ export const menuSlugTranslations = {
     lunchDinner: 'Déjeuner et Dîner',
     dateFrom: 'Du',
     dateTo: 'au',
+    dayLun: 'Lun', dayMar: 'Mar', dayMie: 'Mer', dayJue: 'Jeu', dayVie: 'Ven', daySab: 'Sam', dayDom: 'Dim',
   },
   de: {
     perPerson: '/ Person',
@@ -476,5 +500,99 @@ export const menuSlugTranslations = {
     lunchDinner: 'Mittag- und Abendessen',
     dateFrom: 'Von',
     dateTo: 'bis',
+    dayLun: 'Mo', dayMar: 'Di', dayMie: 'Mi', dayJue: 'Do', dayVie: 'Fr', daySab: 'Sa', dayDom: 'So',
+  },
+} as const
+
+// Experiencias (gift card / experiences) page UI strings
+export const experienciasPageTranslations = {
+  es: {
+    howItWorksTitle: 'Cómo funciona',
+    step1: 'Selecciona el menú que quieres regalar entre nuestras opciones.',
+    step2: 'Rellena los datos de la persona a la que se lo quieres enviar.',
+    step3: 'Recibirán una tarjeta regalo con un código único para su reserva.',
+    howToRedeemTitle: 'Cómo canjearla',
+    redeemDesc: 'Es imprescindible reservar con antelación indicando el código proporcionado en la tarjeta.',
+    giftCardValidity: 'Validez de la tarjeta regalo: 3 meses desde la compra.',
+    iframeTitle: 'Comprar Tarjeta Regalo / Experiencias',
+  },
+  ca: {
+    howItWorksTitle: 'Com funciona',
+    step1: "Selecciona el menú que vols regalar entre les nostres opcions.",
+    step2: "Omple les dades de la persona a qui ho vols enviar.",
+    step3: "Rebran una targeta regal amb un codi únic per a la seva reserva.",
+    howToRedeemTitle: 'Com bescanviar-la',
+    redeemDesc: 'És imprescindible reservar amb antelació indicant el codi proporcionat a la targeta.',
+    giftCardValidity: 'Validesa de la targeta regal: 3 mesos des de la compra.',
+    iframeTitle: 'Comprar Targeta Regal / Experiències',
+  },
+  en: {
+    howItWorksTitle: 'How it works',
+    step1: 'Choose the menu you want to gift from our options.',
+    step2: "Fill in the recipient's details.",
+    step3: 'They will receive a gift card with a unique code for their reservation.',
+    howToRedeemTitle: 'How to redeem it',
+    redeemDesc: 'A prior reservation is required — please mention the code provided on the card when booking.',
+    giftCardValidity: 'Gift card validity: 3 months from purchase.',
+    iframeTitle: 'Buy Gift Card / Experiences',
+  },
+  fr: {
+    howItWorksTitle: 'Comment ça fonctionne',
+    step1: 'Choisissez le menu que vous souhaitez offrir parmi nos options.',
+    step2: "Remplissez les coordonnées du destinataire.",
+    step3: 'Ils recevront une carte cadeau avec un code unique pour leur réservation.',
+    howToRedeemTitle: 'Comment la réserver',
+    redeemDesc: 'Une réservation préalable est indispensable en indiquant le code fourni sur la carte.',
+    giftCardValidity: "Validité de la carte cadeau : 3 mois à partir de l'achat.",
+    iframeTitle: 'Acheter une Carte Cadeau / Expériences',
+  },
+  de: {
+    howItWorksTitle: 'So funktioniert es',
+    step1: 'Wähle das Menü, das du verschenken möchtest, aus unseren Optionen.',
+    step2: 'Fülle die Daten der Person aus, an die du es senden möchtest.',
+    step3: 'Sie erhalten eine Geschenkkarte mit einem einmaligen Code für ihre Reservierung.',
+    howToRedeemTitle: 'So wird es eingelöst',
+    redeemDesc: 'Eine Vorabreservierung unter Angabe des auf der Karte angegebenen Codes ist erforderlich.',
+    giftCardValidity: 'Gültigkeit der Geschenkkarte: 3 Monate ab Kauf.',
+    iframeTitle: 'Geschenkkarte / Erlebnisse kaufen',
+  },
+} as const
+
+// Reservas page UI strings
+export const reservasPageTranslations = {
+  es: {
+    preferCallTitle: '¿Prefieres llamar?',
+    cancelPolicyTitle: 'Política de Cancelación',
+    cancelPolicyDesc: 'Para cancelar o modificar tu reserva, utiliza el enlace en tu email de confirmación o llámanos directamente.',
+    cancelPolicyStrong: 'Avísanos de tu cancelación:',
+    iframeTitle: 'Reservas',
+  },
+  ca: {
+    preferCallTitle: 'Prefereixes trucar?',
+    cancelPolicyTitle: 'Política de Cancel·lació',
+    cancelPolicyDesc: "Per cancel·lar o modificar la teva reserva, utilitza l'enllaç al teu email de confirmació o truca'ns directament.",
+    cancelPolicyStrong: 'Avisa\'ns de la teva cancel·lació:',
+    iframeTitle: 'Reserves',
+  },
+  en: {
+    preferCallTitle: 'Would you prefer to call?',
+    cancelPolicyTitle: 'Cancellation Policy',
+    cancelPolicyDesc: 'To cancel or modify your reservation, use the link in your confirmation email or call us directly.',
+    cancelPolicyStrong: 'Let us know if you cancel:',
+    iframeTitle: 'Reservations',
+  },
+  fr: {
+    preferCallTitle: 'Vous préférez appeler ?',
+    cancelPolicyTitle: "Politique d'Annulation",
+    cancelPolicyDesc: "Pour annuler ou modifier votre réservation, utilisez le lien dans votre e-mail de confirmation ou appelez-nous directement.",
+    cancelPolicyStrong: 'Informez-nous de votre annulation :',
+    iframeTitle: 'Réservations',
+  },
+  de: {
+    preferCallTitle: 'Möchten Sie lieber anrufen?',
+    cancelPolicyTitle: 'Stornierungsrichtlinie',
+    cancelPolicyDesc: 'Um Ihre Reservierung zu stornieren oder zu ändern, verwenden Sie den Link in Ihrer Bestätigungs-E-Mail oder rufen Sie uns direkt an.',
+    cancelPolicyStrong: 'Benachrichtigen Sie uns bei einer Stornierung:',
+    iframeTitle: 'Reservierungen',
   },
 } as const

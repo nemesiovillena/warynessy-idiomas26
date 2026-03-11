@@ -4,10 +4,12 @@ import Section from '../../components/ui/Section.astro';
 import Container from '../../components/ui/Container.astro';
 import { getSiteSettings, getPaginaBySlug } from '../../lib/payload-local';
 import { getOptimizedImageUrl } from '../../lib/cdn';
+import { getTranslations } from '../../lib/i18n';
 
 const { lang } = Astro.params;
 const locale = lang || 'es';
 
+const t = getTranslations(locale).reservas;
 const siteSettings = await getSiteSettings(locale);
 const pageData = await getPaginaBySlug('reservas', locale);
 
@@ -59,7 +61,7 @@ const heroImg = getOptimizedImageUrl(rawHeroImg);
              src={`https://www.covermanager.com/reservation/module_restaurant/restaurante-warynessy/${covermanagerLang}`}
              style="width: 100%; min-height: 700px; max-width: 100%; border: none; display: block;"
              id="restaurante-warynessy"
-             title="Reservas"
+             title={t.iframeTitle}
              allow="payment"
              scrolling="no"
            ></iframe>
@@ -96,7 +98,7 @@ const heroImg = getOptimizedImageUrl(rawHeroImg);
       </div>
 
       <div class="mt-12 text-center">
-         <p class="text-white/40 mb-2">¿Prefieres llamar?</p>
+         <p class="text-white/40 mb-2">{t.preferCallTitle}</p>
          {siteSettings?.contact?.phone && (
             <a href={`tel:${siteSettings.contact.phone}`} class="text-2xl font-serif font-bold text-primary hover:text-white transition-colors">
               {siteSettings.contact.phone}
@@ -108,11 +110,11 @@ const heroImg = getOptimizedImageUrl(rawHeroImg);
       <div class="mt-16 p-8 bg-white/5 rounded-2xl border border-white/10">
         <h2 class="text-white font-serif text-xl font-bold mb-6 flex items-center gap-3">
           <span class="material-symbols-outlined text-primary">info</span>
-          Política de Cancelación
+          {t.cancelPolicyTitle}
         </h2>
         <div class="space-y-4 text-white/60 text-sm leading-relaxed">
           <p>
-            <strong class="text-white">Avísanos de tu cancelación:</strong> Para cancelar o modificar tu reserva, utiliza el enlace en tu email de confirmación o llámanos directamente.
+            <strong class="text-white">{t.cancelPolicyStrong}</strong> {t.cancelPolicyDesc}
           </p>
         </div>
       </div>

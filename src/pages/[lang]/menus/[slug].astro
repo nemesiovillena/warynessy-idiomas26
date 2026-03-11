@@ -74,14 +74,15 @@ const formatDate = (dateString: string) => {
   });
 };
 
+// Day abbreviations taken from i18n translations
 const daysMap: Record<string, string> = {
-  'lunes': 'Lun',
-  'martes': 'Mar',
-  'miercoles': 'Mie',
-  'jueves': 'Jue',
-  'viernes': 'Vie',
-  'sabado': 'Sab',
-  'domingo': 'Dom'
+  'lunes':    ui.dayLun,
+  'martes':   ui.dayMar,
+  'miercoles':ui.dayMie,
+  'jueves':   ui.dayJue,
+  'viernes':  ui.dayVie,
+  'sabado':   ui.daySab,
+  'domingo':  ui.dayDom,
 };
 ---
 
