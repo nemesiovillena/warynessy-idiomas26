@@ -3,7 +3,8 @@
 
 // En SSR siempre usar localhost para evitar loop Traefik → contenedor → Traefik
 // La URL pública (PUBLIC_PAYLOAD_API_URL) solo aplica en el cliente (browser)
-const API_URL = 'http://localhost:3000/api'
+const PORT = process.env.PORT || '3000'
+const API_URL = `http://localhost:${PORT}/api`
 
 
 interface PayloadResponse<T> {
