@@ -46,6 +46,7 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
 
     // Normalizar src si viene como path relativo
     let path = src;
+    let originalPayloadPath = src; // Guardar la ruta original para Payload
 
     // Si el path ya es una URL optimizada de Bunny, no hacer nada
     if (BUNNY_URL && path.includes(BUNNY_URL)) {
@@ -53,19 +54,21 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
     }
 
     // Si viene de localhost o de la URL del servidor configurada
-    // IMPORTANTE: Siempre strippear el dominio si vamos a usar CDN, 
+    // IMPORTANTE: Siempre strippear el dominio si vamos a usar CDN,
     // de lo contrario tendremos URLs como bunny.net/http://localhost...
     if (path.includes('localhost:3000') || (PAYLOAD_URL && path.includes(PAYLOAD_URL))) {
         path = path.split('localhost:3000').pop() as string;
         path = path.split(PAYLOAD_URL).pop() as string;
+        originalPayloadPath = path;
     }
 
     // Limpiar prefijos de Payload si existen para que la ruta sea relativa a la raíz de Bunny
     // Payload usa /media/ o /api/archivos/file/ dependiendo de la versión y config
     const prefixesToRemove = ['/api/archivos/file/', '/media/'];
+    let cleanedPath = path;
     for (const prefix of prefixesToRemove) {
         if (path.includes(prefix)) {
-            path = '/' + path.split(prefix)[1];
+            cleanedPath = '/' + path.split(prefix)[1];
             break;
         }
     }
@@ -77,6 +80,7 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
 
     // Asegurarnos de que el path empieza por / si es relativo
     if (!path.startsWith('http') && !path.startsWith('/')) path = '/' + path;
+    if (!cleanedPath.startsWith('http') && !cleanedPath.startsWith('/')) cleanedPath = '/' + cleanedPath;
 
     // Log para depurar
     const willUseCDN = !!BUNNY_URL && !shouldIgnoreCDN;
@@ -85,7 +89,8 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
     if (!willUseCDN) {
         // Si el path ya es una URL absoluta, devolverla
         if (path.startsWith('http')) return path;
-        return `${PAYLOAD_URL}${path}`;
+        // Usar la ruta original que incluye el prefijo /api/archivos/file/ para Payload
+        return `${PAYLOAD_URL}${originalPayloadPath}`;
     }
 
     // Construir URL de Bunny.net
@@ -95,9 +100,9 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
     if (options.quality) searchParams.append('q', options.quality.toString());
 
     const queryString = searchParams.toString();
-    const separator = path.includes('?') ? '&' : '?';
+    const separator = cleanedPath.includes('?') ? '&' : '?';
 
-    const finalResult = `${BUNNY_URL}${path}${queryString ? separator + queryString : ''}`;
+    const finalResult = `${BUNNY_URL}${cleanedPath}${queryString ? separator + queryString : ''}`;
 
     if (getEnv('PUBLIC_FORCE_CDN_LOCAL') === 'true') {
         console.log(`[DEBUG] getOptimizedImageUrl: ${src} -> ${finalResult}`);
