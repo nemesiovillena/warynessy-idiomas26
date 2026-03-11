@@ -61,7 +61,7 @@ media/
 archivos/
 .payload/
 build/
-src/payload/payload-types.ts
+# src/payload/payload-types.ts — tracked in repo for CI/CD
 
 # Sanity (old - backup)
 .sanity/
