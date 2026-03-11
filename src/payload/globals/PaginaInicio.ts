@@ -45,7 +45,6 @@ export const PaginaInicio: GlobalConfig = {
                 targetLang: targetLocale,
                 endpoint,
                 model: modelo,
-                  proveedor,
                 operation: 'update'
               });
 

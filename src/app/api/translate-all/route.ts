@@ -68,7 +68,6 @@ export async function GET(req: Request) {
                             targetLang: locale,
                             endpoint,
                             model: modelo,
-                            proveedor,
                             operation: 'update',
                         })
 
@@ -107,7 +106,6 @@ export async function GET(req: Request) {
                         targetLang: locale,
                         endpoint,
                         model: modelo,
-                        proveedor,
                         operation: 'update',
                     })
 
