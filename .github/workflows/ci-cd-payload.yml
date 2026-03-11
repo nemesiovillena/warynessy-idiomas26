@@ -235,22 +235,48 @@ jobs:
           echo "   [ ] Plan de rollback preparado"
           echo "   [ ] Equipo notificado del deploy"
       
-      - name: 🚀 Trigger de Dokploy (manual)
+      - name: 🚀 Deploy payload a Dokploy
         run: |
-          echo "🚀 Deploy programado para Dokploy"
-          echo ""
-          echo "⚠️ Nota: Este workflow NO hace deploy automático"
-          echo ""
-          echo "Para hacer deploy a producción:"
-          echo "  1. Ve a tu panel de Dokploy"
-          echo "  2. Navega al proyecto warynessy26"
-          echo "  3. Hacer pull de los últimos cambios"
-          echo "  4. Ejecutar 'npm run migrate' en el servidor"
-          echo "  5. Reiniciar el servidor"
-          echo "  6. Verificar logs de aplicación"
-          echo ""
-          echo "📊 O usar el MCP server de Dokploy para deploy automático"
-      
+          echo "🚀 Triggerando deploy de payload..."
+          HTTP_STATUS=$(curl -s -o /tmp/dokploy-payload.json -w "%{http_code}" \
+            -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"refreshToken\": \"${{ secrets.DOKPLOY_PAYLOAD_TOKEN }}\"}")
+          echo "Response: $(cat /tmp/dokploy-payload.json)"
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✅ Deploy de payload triggerado (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Error al triggerear deploy de payload (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+
+      - name: 🚀 Deploy translation-agent a Dokploy
+        run: |
+          echo "🚀 Triggerando deploy de translation-agent..."
+          HTTP_STATUS=$(curl -s -o /tmp/dokploy-translation.json -w "%{http_code}" \
+            -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"refreshToken\": \"${{ secrets.DOKPLOY_TRANSLATION_TOKEN }}\"}")
+          echo "Response: $(cat /tmp/dokploy-translation.json)"
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "✅ Deploy de translation-agent triggerado (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Error al triggerear deploy de translation-agent (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+
+      - name: 🏥 Health check post-deploy (payload)
+        run: |
+          echo "⏳ Esperando que payload arranque (90s)..."
+          sleep 90
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://warynessy.com/ --max-time 30)
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ warynessy.com responde OK (HTTP $HTTP_STATUS)"
+          else
+            echo "⚠️ Health check fallido (HTTP $HTTP_STATUS) — verificar logs en Dokploy"
+            exit 1
+          fi
+
       - name: ✅ Notificar deploy completado
         if: success()
         run: |
@@ -261,8 +287,10 @@ jobs:
           echo "   ✅ Verificación de tipos: OK"
           echo "   ✅ Seguridad de scripts: OK"
           echo "   ✅ Migraciones: OK"
-          echo "   ✅ Deploy: Programado"
-      
+          echo "   ✅ Deploy payload: OK"
+          echo "   ✅ Deploy translation-agent: OK"
+          echo "   ✅ Health check warynessy.com: OK"
+
       - name: ❌ Notificar falla del deploy
         if: failure()
         run: |
@@ -270,10 +298,10 @@ jobs:
           echo ""
           echo "📊 Revisar:"
           echo "   • Logs de error en los jobs anteriores"
+          echo "   • Estado de los servicios en panel.eneweb.es"
           echo "   • Scripts de migración modificados"
-          echo "   • Cambios en configuración de Payload"
           echo ""
-          echo "🚨 NO hacer deploy hasta corregir errores"
+          echo "🚨 Verificar manualmente el estado de producción"
 
   # ==========================================
   # JOB 4: Reporte de Seguridad

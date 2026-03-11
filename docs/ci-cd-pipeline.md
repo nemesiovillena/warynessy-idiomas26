@@ -360,43 +360,23 @@ npm run migrate:rollback
 
 ## 📱 Integración con Dokploy
 
-### Opción 1: Deploy Manual (Actual)
+### Deploy Automático via Webhook (Activo)
 
-1. **Ir a panel de Dokploy**
-2. **Navegar al proyecto warynessy26**
-3. **Hacer pull:**
-   ```bash
-   git pull origin main
-   ```
-4. **Ejecutar migraciones:**
-   ```bash
-   npm run migrate
-   ```
-5. **Reiniciar servidor:**
-   ```bash
-   # En Dokploy: Click en "Restart"
-   ```
-6. **Verificar logs:**
-   - Buscar errores de migración
-   - Verificar que aplicación inicia correctamente
+El pipeline triggerea automáticamente los deploys en Dokploy tras pasar verify + migrate.
 
-### Opción 2: Deploy Automático con MCP
+**Flujo:**
+1. Push a `main` → CI/CD arranca
+2. Job `verify` → TypeScript, seguridad, build
+3. Job `migrate` → migraciones contra DB de test
+4. Job `deploy` → webhook a Dokploy para `payload` y `translation-agent`
+5. Health check → `https://warynessy.com/` debe responder 200
 
-```bash
-# Usar el MCP server de Dokploy
-# El workflow puede hacer deploy automático si se configura
-```
+**Secrets configurados en GitHub:**
+- `DOKPLOY_WEBHOOK_URL` → `https://panel.eneweb.es/api/deploy.redeploy`
+- `DOKPLOY_PAYLOAD_TOKEN` → refreshToken de la app `payload`
+- `DOKPLOY_TRANSLATION_TOKEN` → refreshToken de la app `translation-agent`
 
-### Opción 3: GitHub Actions + Dokploy Webhook
-
-```yaml
-# Agregar a .github/workflows/ci-cd-payload.yml
-- name: 🚀 Trigger Dokploy Deploy
-  run: |
-    curl -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
-      -H "Content-Type: application/json" \
-      -d '{"action": "deploy", "branch": "main"}'
-```
+**Nota:** `autoDeploy` desactivado en Dokploy para `payload`. El deploy ocurre solo cuando el CI pasa.
 
 ---
 
@@ -492,7 +472,7 @@ npm run migrate:rollback
 | Scripts de Migración | ✅ Agregados | 2026-03-03 |
 | Verificaciones de Seguridad | ✅ Activas | 2026-03-03 |
 | Reportes de Seguridad | ✅ Automáticos | 2026-03-03 |
-| Integración Dokploy | ⚠️ Manual | - |
+| Integración Dokploy | ✅ Automático via webhook | 2026-03-11 |
 
 ---
 
