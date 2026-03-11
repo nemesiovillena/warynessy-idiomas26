@@ -34,11 +34,15 @@ export function getOptimizedImageUrl(src: string, options: CDNOptions = {}): str
     const isDevelopment = getEnv('NODE_ENV') === 'development';
     const isLocalPath = src.includes('localhost') || src.includes('127.0.0.1') || (!src.startsWith('http') && isDevelopment);
 
-    // En desarrollo, normalmente ignoramos el CDN para usar archivos locales.
-    // Pero si el usuario quiere ver las imágenes del CDN porque no las tiene en local,
-    // permitimos el uso del CDN si existe la URL configurada.
+    // En desarrollo, verificar si Bunny Storage está configurado
+    // Si no está configurado (BUNNY_STORAGE_ZONE_NAME vacío), no usar CDN
+    const hasBunnyStorage = getEnv('BUNNY_STORAGE_ZONE_NAME', '').length > 0;
+
+    // En desarrollo, ignorar CDN si:
+    // 1. No está configurado el almacenamiento en Bunny, O
+    // 2. Es una ruta local y no hay FORCE_CDN
     const FORCE_CDN = getEnv('PUBLIC_FORCE_CDN_LOCAL') === 'true';
-    const shouldIgnoreCDN = isDevelopment && isLocalPath && !FORCE_CDN;
+    const shouldIgnoreCDN = isDevelopment && (!hasBunnyStorage || (isLocalPath && !FORCE_CDN));
 
     // Normalizar src si viene como path relativo
     let path = src;

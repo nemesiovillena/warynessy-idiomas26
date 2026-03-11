@@ -5,7 +5,6 @@ import Container from '../../components/ui/Container.astro';
 import ResponsiveImage from '../../components/ui/ResponsiveImage.astro';
 import RichText from '../../components/ui/RichText.astro';
 import { getSiteSettings, getPaginaBySlug } from '../../lib/payload-local';
-import { getOptimizedImageUrl } from '../../lib/cdn';
 import { getTranslations } from '../../lib/i18n';
 
 const { lang } = Astro.params;
@@ -26,7 +25,7 @@ console.log('[DEBUG] Historia Page Data:', {
 });
 
 const heroImage = typeof pageData?.heroImage === 'object' && pageData?.heroImage?.url
-  ? getOptimizedImageUrl(pageData.heroImage.url)
+  ? pageData.heroImage.url
   : null;
 
 const pageTitle = pageData?.metaTitle || `${ui.metaTitle} | ${siteSettings?.title || "Restaurante Warynessy"}`;
@@ -113,7 +112,7 @@ const pageDescription = pageData?.metaDescription || ui.metaDescription;
                     {hito.imagen ? (
                       <div class="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
                         <ResponsiveImage
-                          src={getOptimizedImageUrl(hito.imagen?.url)}
+                          src={hito.imagen?.url}
                           alt={hito.imagen?.alt || hito.titulo}
                           class="w-full h-full object-cover grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 scale-105 group-hover:scale-100"
                         />
