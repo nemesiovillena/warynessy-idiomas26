@@ -1,11 +1,12 @@
 import { getPayload } from 'payload'
 import config from '../../../../payload.config'
 import { NextResponse } from 'next/server'
-import { translatingIds } from '../../../payload/utils/translation-utils'
+import { translateDocument } from '../../../payload/utils/translation-utils'
 
 export const dynamic = 'force-dynamic'
-// Aumentar el timeout para este endpoint
 export const maxDuration = 300
+
+const TARGET_LOCALES = ['ca', 'en', 'fr', 'de'] as const
 
 export async function GET(req: Request) {
     try {
@@ -17,11 +18,17 @@ export async function GET(req: Request) {
         }
 
         const payload = await getPayload({ config })
-        const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
+        // Leer configuración de traducción
+        const configTraduccion: any = await payload.findGlobal({ slug: 'configuracion-traduccion' as any })
+        const endpoint = configTraduccion?.endpointAgente || 'http://localhost:8000/translate'
+        const modelo = configTraduccion?.modeloIA || 'gemini-2.0-flash'
+        const proveedor = configTraduccion?.proveedorIA || 'gemini-api'
+
+        const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
         const results: Record<string, any> = {}
 
-        // Traducir menus
+        // --- Menus ---
         const { docs: menus } = await payload.find({
             collection: 'menus',
             limit: 1000,
@@ -30,27 +37,41 @@ export async function GET(req: Request) {
         })
 
         results.menus = { total: menus.length, success: 0, errors: 0 }
-        console.log(`[Translate-Menus] Traduciendo ${menus.length} menús...`)
+        console.log(`[Translate-Menus] Traduciendo ${menus.length} menús (${proveedor} / ${modelo})...`)
 
         for (const doc of menus) {
             try {
-                while (translatingIds.has(doc.id)) await sleep(500)
-                await payload.update({
-                    collection: 'menus',
-                    id: doc.id,
-                    data: { _triggeredAt: new Date().toISOString() } as any,
-                    locale: 'es' as any,
-                })
+                for (const locale of TARGET_LOCALES) {
+                    const { translatedData, hasTranslations } = await translateDocument({
+                        doc,
+                        fields: ['nombre', 'etiqueta', 'descripcion_menu', 'fechasDias', 'descripcion'],
+                        targetLang: locale,
+                        endpoint,
+                        model: modelo,
+                        proveedor,
+                        operation: 'update',
+                    })
+
+                    if (hasTranslations) {
+                        await payload.update({
+                            collection: 'menus',
+                            id: doc.id,
+                            locale: locale as any,
+                            data: translatedData,
+                            req: { payload, disableHooks: true } as any,
+                        })
+                    }
+                }
                 results.menus.success++
-                console.log(`[Translate-Menus] Menú ${doc.id} disparado`)
-                await sleep(2000) // 2s entre documentos para no saturar el agente
+                console.log(`[Translate-Menus] ✓ menú ${doc.id} (${doc.nombre})`)
+                await sleep(1000)
             } catch (error) {
                 console.error(`[Translate-Menus] Error menú ${doc.id}:`, error)
                 results.menus.errors++
             }
         }
 
-        // Traducir menus-grupo
+        // --- Menus Grupo ---
         const { docs: grupos } = await payload.find({
             collection: 'menus-grupo' as any,
             limit: 100,
@@ -63,15 +84,29 @@ export async function GET(req: Request) {
 
         for (const doc of grupos) {
             try {
-                while (translatingIds.has(doc.id)) await sleep(500)
-                await payload.update({
-                    collection: 'menus-grupo' as any,
-                    id: doc.id,
-                    data: { _triggeredAt: new Date().toISOString() } as any,
-                    locale: 'es' as any,
-                })
+                for (const locale of TARGET_LOCALES) {
+                    const { translatedData, hasTranslations } = await translateDocument({
+                        doc,
+                        fields: ['nombre', 'descripcion'],
+                        targetLang: locale,
+                        endpoint,
+                        model: modelo,
+                        proveedor,
+                        operation: 'update',
+                    })
+
+                    if (hasTranslations) {
+                        await payload.update({
+                            collection: 'menus-grupo' as any,
+                            id: doc.id,
+                            locale: locale as any,
+                            data: translatedData,
+                            req: { payload, disableHooks: true } as any,
+                        })
+                    }
+                }
                 results['menus-grupo'].success++
-                await sleep(2000)
+                await sleep(500)
             } catch (error) {
                 console.error(`[Translate-Menus] Error grupo ${doc.id}:`, error)
                 results['menus-grupo'].errors++
