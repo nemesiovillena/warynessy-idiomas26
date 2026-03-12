@@ -92,7 +92,7 @@ export default buildConfig({
   ],
 
   // Configuraciรณn del editor
-  editor: lexicalEditor({}),
+  // editor: lexicalEditor({}),  // Temporarily disabled during debug
 
   // Configuraciรณn de base de datos
   db: postgresAdapter({
