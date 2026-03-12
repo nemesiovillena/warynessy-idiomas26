@@ -47,28 +47,23 @@ export { importMap } from './src/app/(payload)/admin/importMap.js'
 export default buildConfig({
   // Configuraciรณn del panel de administraciรณn
   admin: {
-    // user: Usuarios.slug,  // NOTE: Disabled temporarily - Usuarios collection is disabled
+    // user: Usuarios.slug,  // NOTE: Disabled temporarily
     meta: {
       titleSuffix: '- Warynessy CMS',
     },
   },
 
-  // Internacionalización (i18n)
+  // Internacionalización (i18n) - TEMPORARILY MINIMIZED
   localization: {
     locales: [
       { label: 'Español', code: 'es' },
-      { label: 'Valencià', code: 'ca' },
-      { label: 'English', code: 'en' },
-      { label: 'Français', code: 'fr' },
-      { label: 'Deutsch', code: 'de' },
     ],
     defaultLocale: 'es',
-    fallback: true,
   },
-  i18n: {
-    fallbackLanguage: 'es',
-    supportedLanguages: { es, en, ca, de, fr },
-  },
+  // i18n: {
+  //   fallbackLanguage: 'es',
+  //   supportedLanguages: { es, en, ca, de, fr },
+  // },
 
   // Colecciones (tipos de documentos)
   collections: [
