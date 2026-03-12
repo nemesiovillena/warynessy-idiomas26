@@ -50,8 +50,27 @@ export async function GET(req: Request) {
     if (action === 'migrate-all') {
         const log: string[] = []
         try {
-            log.push('Executing Drizzle migrations...')
-            const output = execSync(
+            log.push('Starting Drizzle migrations...')
+
+            // First: generate migrations if needed
+            try {
+                log.push('Step 1: Generating migrations...')
+                const genOutput = execSync(
+                    `DATABASE_URL="${process.env.DATABASE_URL}" npx drizzle-kit generate`,
+                    {
+                        encoding: 'utf-8',
+                        stdio: 'pipe',
+                        cwd: process.cwd(),
+                    }
+                )
+                log.push('Generated: ' + (genOutput || '(no output)'))
+            } catch (genError: any) {
+                log.push('Generate completed with: ' + (genError.message || '(completed)'))
+            }
+
+            // Second: migrate
+            log.push('Step 2: Applying migrations...')
+            const migrateOutput = execSync(
                 `DATABASE_URL="${process.env.DATABASE_URL}" npx drizzle-kit migrate`,
                 {
                     encoding: 'utf-8',
@@ -59,11 +78,11 @@ export async function GET(req: Request) {
                     cwd: process.cwd(),
                 }
             )
-            log.push(output)
+            log.push('Migrated: ' + (migrateOutput || '(no output)'))
             log.push('✅ Drizzle migrations completed successfully')
             return NextResponse.json({ success: true, log })
         } catch (error: any) {
-            log.push(`❌ Error: ${error.message}`)
+            log.push(`❌ Fatal error: ${error.message}`)
             if (error.stderr) log.push('STDERR: ' + error.stderr.toString())
             if (error.stdout) log.push('STDOUT: ' + error.stdout.toString())
             return NextResponse.json({ success: false, log, error: error.message }, { status: 500 })
