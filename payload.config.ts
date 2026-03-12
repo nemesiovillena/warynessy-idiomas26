@@ -132,34 +132,39 @@ export default buildConfig({
 
   plugins: [
     // Solo activar Bunny Storage en producción o cuando estén configuradas las credenciales
-    ...(process.env.BUNNY_STORAGE_PASSWORD && process.env.BUNNY_STORAGE_ZONE_NAME ? [
-      bunnyStorage({
-        collections: {
-          archivos: true,
-        },
-        storage: {
-          apiKey: process.env.BUNNY_STORAGE_PASSWORD || '',
-          zoneName: process.env.BUNNY_STORAGE_ZONE_NAME || '',
-          hostname: process.env.PUBLIC_BUNNY_CDN_URL || 'https://warynessy.b-cdn.net',
-        },
-      }),
-    ] : []),
+    // NOTE: Disabled temporarily - archivos collection is disabled
+    // ...(process.env.BUNNY_STORAGE_PASSWORD && process.env.BUNNY_STORAGE_ZONE_NAME ? [
+    //   bunnyStorage({
+    //     collections: {
+    //       archivos: true,
+    //     },
+    //     storage: {
+    //       apiKey: process.env.BUNNY_STORAGE_PASSWORD || '',
+    //       zoneName: process.env.BUNNY_STORAGE_ZONE_NAME || '',
+    //       hostname: process.env.PUBLIC_BUNNY_CDN_URL || 'https://warynessy.b-cdn.net',
+    //     },
+    //   }),
+    // ] : []),
     backupPlugin({
       // Colecciones a monitorizar (excluye automáticamente las internas del plugin)
+      // NOTE: All collections disabled during debug
       collections: [
-        'alergenos',
-        'categorias',
-        'platos',
-        'menus',
-        'menus-grupo',
-        'espacios',
-        'banners',
-        'archivos',
-        'paginas',
-        'experiencias',
+        // 'alergenos',
+        // 'categorias',
+        // 'platos',
+        // 'menus',
+        // 'menus-grupo',
+        // 'espacios',
+        // 'banners',
+        // 'archivos',
+        // 'paginas',
+        // 'experiencias',
       ],
       // Globals a monitorizar
-      globals: ['pagina-inicio', 'configuracion-sitio'],
+      globals: [
+        // 'pagina-inicio',
+        // 'configuracion-sitio'
+      ],
       // Configuración del agente de background
       agent: {
         incrementalIntervalMs: 60 * 60 * 1000,   // Consolidar cada hora
