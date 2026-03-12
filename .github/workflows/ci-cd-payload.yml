@@ -73,13 +73,24 @@ jobs:
         run: |
           echo "🔍 Verificando seguridad de migraciones..."
 
-          # Buscar migraciones con operaciones peligrosas (excluyendo la inicial que tiene DROP TABLE legítimos)
-          if find src/migrations -name "*.ts" ! -name "*initial*" -exec grep -l "DROP TABLE\|DROP SCHEMA\|DELETE FROM\|TRUNCATE" {} \; | grep -q .; then
-            echo "❌ ERROR: Se encontraron operaciones peligrosas en migraciones posteriores:"
-            find src/migrations -name "*.ts" ! -name "*initial*" -exec grep -Hn "DROP TABLE\|DROP SCHEMA\|DELETE FROM\|TRUNCATE" {} \;
+          # Buscar migraciones con operaciones peligrosas en la función up()
+          # Ignora funciones down() que pueden tener DROP TABLE legítimos (rollbacks)
+          DANGEROUS_OPS_FOUND=0
+          for f in $(find src/migrations -name "*.ts" ! -name "*initial*"); do
+            # Extrae solo el bloque up() — desde "export async function up" hasta la siguiente función
+            # Si encuentra operaciones peligrosas en up(), es un error
+            if awk '/^export async function up/,/^export async function down/' "$f" | \
+               grep -qE "DROP TABLE|DROP SCHEMA|DELETE FROM|TRUNCATE"; then
+              echo "❌ PELIGROSO en up(): $f"
+              DANGEROUS_OPS_FOUND=1
+            fi
+          done
+
+          if [ $DANGEROUS_OPS_FOUND -eq 1 ]; then
+            echo "❌ ERROR: Se encontraron operaciones peligrosas en migraciones"
             exit 1
           else
-            echo "✅ No se encontraron operaciones peligrosas en migraciones (initial excluida)"
+            echo "✅ No se encontraron operaciones peligrosas en migraciones (down() permitido)"
           fi
       
       - name: 🏗️ Build de Astro
