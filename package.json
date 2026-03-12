@@ -18,7 +18,8 @@
     "generate:types": "payload generate:types",
     "migrate": "payload migrate",
     "migrate:create": "payload migrate:create",
-    "migrate:rollback": "payload migrate:rollback"
+    "migrate:rollback": "payload migrate:rollback",
+    "lint": "echo 'No linter configured'"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",

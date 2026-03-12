@@ -23,15 +23,8 @@ export async function GET(req: Request) {
         const payload = await getPayload({ config });
         log.push('✅ Payload initialized');
 
-        // Forzar sync del schema
-        log.push('🔄 Syncing schema...');
-        await payload.triggerInit();
-        log.push('✅ Schema synced');
-
-        // Verificar tablas creadas
-        const { DatabaseAdapter } = await import('@payloadcms/db-postgres');
-        const adapter = payload.db;
-
+        // Payload v3 with push: true in config auto-syncs schema
+        log.push('🔄 Schema sync triggered via getPayload()');
         log.push('📊 Sync complete!');
 
         return NextResponse.json({ success: true, log });
