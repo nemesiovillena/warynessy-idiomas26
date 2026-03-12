@@ -72,7 +72,7 @@ export default buildConfig({
 
   // Colecciones (tipos de documentos)
   collections: [
-    // Usuarios,
+    Usuarios,
     // Archivos,
     // Alergenos,
     // Categorias,
