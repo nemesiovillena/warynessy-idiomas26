@@ -8,7 +8,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 // Re-exportar el importMap generado por Payload (requerido por page.tsx del admin)
-export { importMap } from './src/app/(payload)/admin/importMap.js'
+// export { importMap } from './src/app/(payload)/admin/importMap.js'
 
 export default buildConfig({
   admin: {
