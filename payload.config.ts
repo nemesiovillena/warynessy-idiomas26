@@ -72,23 +72,23 @@ export default buildConfig({
 
   // Colecciones (tipos de documentos)
   collections: [
-    Usuarios,
-    Archivos,
-    Alergenos,
-    Categorias,
-    Platos,
-    Menus,
-    Espacios,
-    Banners,
-    Paginas,
-    Experiencias,
-    MenusGrupo,
+    // Usuarios,
+    // Archivos,
+    // Alergenos,
+    // Categorias,
+    // Platos,
+    // Menus,
+    // Espacios,
+    // Banners,
+    // Paginas,
+    // Experiencias,
+    // MenusGrupo,
   ],
 
   globals: [
-    PaginaInicio,
-    ConfiguracionSitio,
-    ConfiguracionTraduccion,
+    // PaginaInicio,
+    // ConfiguracionSitio,
+    // ConfiguracionTraduccion,
   ],
 
   // Configuraciรณn del editor
