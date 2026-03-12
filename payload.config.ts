@@ -4,19 +4,24 @@ import sharp from 'sharp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { Usuarios } from './src/payload/collections/Usuarios'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 // Re-exportar el importMap generado por Payload (requerido por page.tsx del admin)
-// export { importMap } from './src/app/(payload)/admin/importMap.js'
+export { importMap } from './src/app/(payload)/admin/importMap.js'
 
 export default buildConfig({
   admin: {
+    user: Usuarios.slug,
     meta: {
       titleSuffix: '- Warynessy CMS',
     },
   },
-  collections: [],
+  collections: [
+    Usuarios,
+  ],
   globals: [],
 
   db: postgresAdapter({
