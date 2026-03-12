@@ -131,8 +131,8 @@ export default buildConfig({
   ].filter(Boolean) as string[],
 
   plugins: [
+    // NOTE: All plugins disabled during admin debug
     // Solo activar Bunny Storage en producción o cuando estén configuradas las credenciales
-    // NOTE: Disabled temporarily - archivos collection is disabled
     // ...(process.env.BUNNY_STORAGE_PASSWORD && process.env.BUNNY_STORAGE_ZONE_NAME ? [
     //   bunnyStorage({
     //     collections: {
@@ -145,39 +145,35 @@ export default buildConfig({
     //     },
     //   }),
     // ] : []),
-    backupPlugin({
-      // Colecciones a monitorizar (excluye automáticamente las internas del plugin)
-      // NOTE: All collections disabled during debug
-      collections: [
-        // 'alergenos',
-        // 'categorias',
-        // 'platos',
-        // 'menus',
-        // 'menus-grupo',
-        // 'espacios',
-        // 'banners',
-        // 'archivos',
-        // 'paginas',
-        // 'experiencias',
-      ],
-      // Globals a monitorizar
-      globals: [
-        // 'pagina-inicio',
-        // 'configuracion-sitio'
-      ],
-      // Configuración del agente de background
-      agent: {
-        incrementalIntervalMs: 60 * 60 * 1000,   // Consolidar cada hora
-        fullBackupIntervalMs: 24 * 60 * 60 * 1000, // Backup completo cada 24h
-        consolidateAfterDeltas: 100,               // Consolidar tras 100 cambios
-        retention: {
-          maxDeltas: 500,
-          maxIncrementalSnapshots: 30,
-          keepWeeklySnapshots: 4,
-          keepMonthlySnapshots: 12,
-        },
-      },
-    }),
+    // backupPlugin({
+    //   // Colecciones a monitorizar (excluye automáticamente las internas del plugin)
+    //   collections: [
+    //     'alergenos',
+    //     'categorias',
+    //     'platos',
+    //     'menus',
+    //     'menus-grupo',
+    //     'espacios',
+    //     'banners',
+    //     'archivos',
+    //     'paginas',
+    //     'experiencias',
+    //   ],
+    //   // Globals a monitorizar
+    //   globals: ['pagina-inicio', 'configuracion-sitio'],
+    //   // Configuración del agente de background
+    //   agent: {
+    //     incrementalIntervalMs: 60 * 60 * 1000,   // Consolidar cada hora
+    //     fullBackupIntervalMs: 24 * 60 * 60 * 1000, // Backup completo cada 24h
+    //     consolidateAfterDeltas: 100,               // Consolidar tras 100 cambios
+    //     retention: {
+    //       maxDeltas: 500,
+    //       maxIncrementalSnapshots: 30,
+    //       keepWeeklySnapshots: 4,
+    //       keepMonthlySnapshots: 12,
+    //     },
+    //   },
+    // }),
   ],
 })
 
