@@ -99,7 +99,7 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
-    push: true, // Auto-sync schema on startup (creates tables)
+    push: false, // Disabled due to production schema inconsistencies - use /api/sync-schema instead
   }),
 
   // Optimizaciรณn de imรกgenes
