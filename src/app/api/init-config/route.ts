@@ -64,7 +64,8 @@ export async function GET(req: Request) {
             return NextResponse.json({ success: true, log })
         } catch (error: any) {
             log.push(`❌ Error: ${error.message}`)
-            log.push(error.stderr?.toString() || error.stdout?.toString() || '')
+            if (error.stderr) log.push('STDERR: ' + error.stderr.toString())
+            if (error.stdout) log.push('STDOUT: ' + error.stdout.toString())
             return NextResponse.json({ success: false, log, error: error.message }, { status: 500 })
         }
     }
