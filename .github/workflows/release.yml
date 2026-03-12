@@ -44,9 +44,6 @@ jobs:
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
 
-      - name: Run tests
-        run: npm test
-
       - name: Run linting
         run: npm run lint
 

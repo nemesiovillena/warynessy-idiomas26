@@ -254,6 +254,7 @@ jobs:
         run: |
           echo "🚀 Triggerando deploy de payload..."
           HTTP_STATUS=$(curl -s -o /tmp/dokploy-payload.json -w "%{http_code}" \
+            --max-time 30 \
             -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
             -d "{\"refreshToken\": \"${{ secrets.DOKPLOY_PAYLOAD_TOKEN }}\"}")
@@ -269,6 +270,7 @@ jobs:
         run: |
           echo "🚀 Triggerando deploy de translation-agent..."
           HTTP_STATUS=$(curl -s -o /tmp/dokploy-translation.json -w "%{http_code}" \
+            --max-time 30 \
             -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
             -d "{\"refreshToken\": \"${{ secrets.DOKPLOY_TRANSLATION_TOKEN }}\"}")
