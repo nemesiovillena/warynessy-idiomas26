@@ -2,15 +2,17 @@ import { getPayload } from 'payload'
 import config from '../../../../payload.config'
 import { NextResponse } from 'next/server'
 import pg from 'pg'
+import { execSync } from 'child_process'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * Endpoint para arreglar el schema de configuracion_traduccion en producción.
+ * Endpoint para ejecutar migraciones y arreglar schema en producción.
  * Crea enums y columnas faltantes (proveedor_i_a, modelo_i_a) si no existen.
  * Uso: GET /api/init-config?secret=<PAYLOAD_SECRET>
  * Diagnóstico: GET /api/init-config?secret=<PAYLOAD_SECRET>&action=diagnose
- * Aplicar migraciones pendientes: GET /api/init-config?secret=<PAYLOAD_SECRET>&action=migrate
+ * Ejecutar migraciones Drizzle: GET /api/init-config?secret=<PAYLOAD_SECRET>&action=migrate-all
+ * Aplicar migraciones manuales: GET /api/init-config?secret=<PAYLOAD_SECRET>&action=migrate
  */
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
@@ -41,6 +43,29 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: e.message }, { status: 500 })
         } finally {
             await pool.end()
+        }
+    }
+
+    // Action: migrate-all — executes full Drizzle migrations to create all tables
+    if (action === 'migrate-all') {
+        const log: string[] = []
+        try {
+            log.push('Executing Drizzle migrations...')
+            const output = execSync(
+                `DATABASE_URL="${process.env.DATABASE_URL}" npx drizzle-kit migrate`,
+                {
+                    encoding: 'utf-8',
+                    stdio: 'pipe',
+                    cwd: process.cwd(),
+                }
+            )
+            log.push(output)
+            log.push('✅ Drizzle migrations completed successfully')
+            return NextResponse.json({ success: true, log })
+        } catch (error: any) {
+            log.push(`❌ Error: ${error.message}`)
+            log.push(error.stderr?.toString() || error.stdout?.toString() || '')
+            return NextResponse.json({ success: false, log, error: error.message }, { status: 500 })
         }
     }
 
