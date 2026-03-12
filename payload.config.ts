@@ -47,7 +47,7 @@ export { importMap } from './src/app/(payload)/admin/importMap.js'
 export default buildConfig({
   // Configuraciรณn del panel de administraciรณn
   admin: {
-    user: Usuarios.slug,
+    user: 'usuarios',
     meta: {
       titleSuffix: '- Warynessy CMS',
     },
