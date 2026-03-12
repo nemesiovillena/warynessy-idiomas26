@@ -81,23 +81,18 @@ COPY --from=builder /app/src/migrations ./src/migrations
 # Copy tsconfig for payload migrate command
 COPY --from=builder /app/tsconfig.json ./
 
-# Create startup script that runs migrations then starts server
-RUN echo '#!/bin/sh' > /app/start.sh && \
-    echo 'set -e' >> /app/start.sh && \
-    echo 'echo "Running Payload migrations..."' >> /app/start.sh && \
-    echo 'if npx payload migrate; then' >> /app/start.sh && \
-    echo '  echo "Migrations completed successfully"' >> /app/start.sh && \
-    echo 'else' >> /app/start.sh && \
-    echo '  echo "⚠️  Migration failed or no migrations to run"' >> /app/start.sh && \
-    echo 'fi' >> /app/start.sh && \
-    echo 'echo "Starting server..."' >> /app/start.sh && \
-    echo 'exec node server.js' >> /app/start.sh && \
-    chmod +x /app/start.sh
-
 # Create media directories with correct permissions
 # /app/media  → Payload staticDir (upload destination)
 # /app/public/media → served statically by Next.js (kept for compatibility)
 RUN mkdir -p /app/media /app/public/media && chown -R payload:nodejs /app
+
+# Create startup script that runs migrations then starts server
+# NOTA: npx payload migrate falla en runtime por problema CSS en tsx loader
+# Usamos un healthcheck que intenta conectar a DB en lugar de ejecutar migraciones aquí
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'echo "Starting Payload server..."' >> /app/start.sh && \
+    echo 'exec node server.js' >> /app/start.sh && \
+    chmod +x /app/start.sh
 
 # Set environment (will be overridden by Dokploy env vars)
 ENV NODE_ENV=production
