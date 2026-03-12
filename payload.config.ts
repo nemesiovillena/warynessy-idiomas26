@@ -73,8 +73,8 @@ export default buildConfig({
   // Colecciones (tipos de documentos)
   collections: [
     // Usuarios,  // ⚠️ CAUSES SERVER COMPONENT ERROR - DISABLED
-    Archivos,
-    // Alergenos,
+    // Archivos,  // ⚠️ CAUSES SERVER COMPONENT ERROR - DISABLED
+    Alergenos,
     // Categorias,
     // Platos,
     // Menus,
