@@ -83,8 +83,13 @@ COPY --from=builder /app/tsconfig.json ./
 
 # Create startup script that runs migrations then starts server
 RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'set -e' >> /app/start.sh && \
     echo 'echo "Running Payload migrations..."' >> /app/start.sh && \
-    echo 'npx payload migrate || echo "Migration failed or no migrations to run"' >> /app/start.sh && \
+    echo 'if npx payload migrate; then' >> /app/start.sh && \
+    echo '  echo "Migrations completed successfully"' >> /app/start.sh && \
+    echo 'else' >> /app/start.sh && \
+    echo '  echo "⚠️  Migration failed or no migrations to run"' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
     echo 'echo "Starting server..."' >> /app/start.sh && \
     echo 'exec node server.js' >> /app/start.sh && \
     chmod +x /app/start.sh
